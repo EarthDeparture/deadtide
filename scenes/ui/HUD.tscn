@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1hud"]
+
+[ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="1_hud"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Control" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RoundLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 16.0
+offset_right = 100.0
+offset_bottom = 50.0
+grow_horizontal = 2
+horizontal_alignment = 1
+text = "ROUND 1"
+
+[node name="HealthLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -60.0
+offset_right = 160.0
+offset_bottom = -16.0
+grow_vertical = 0
+text = "HEALTH\n100"
+
+[node name="PointsLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -60.0
+offset_right = 80.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+horizontal_alignment = 1
+text = "POINTS\n500"
+
+[node name="AmmoLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -60.0
+offset_right = -20.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+horizontal_alignment = 2
+text = "8 / 56"
+
+[node name="ReloadLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -100.0
+offset_right = 80.0
+offset_bottom = -70.0
+grow_horizontal = 2
+grow_vertical = 0
+horizontal_alignment = 1
+visible = false
+text = "RELOADING..."

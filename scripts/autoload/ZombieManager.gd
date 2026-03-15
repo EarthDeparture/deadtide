@@ -8,9 +8,9 @@ const KILL_POINTS = 100
 const HEADSHOT_POINTS = 100
 const KNIFE_POINTS = 130
 
-var active_zombies: Array = []
+var active_zombies: Array[Node] = []
 var zombie_scene: PackedScene
-var spawn_points: Array = []
+var spawn_points: Array[Node3D] = []
 
 func _ready():
 	print("ZombieManager initialized")
@@ -28,12 +28,18 @@ func spawn_wave(round_number: int):
 
 func _spawn_zombie():
 	if spawn_points.is_empty():
-		print("Warning: No spawn points registered!")
+		for sp in get_tree().get_nodes_in_group("spawn_points"):
+			spawn_points.append(sp as Node3D)
+	if spawn_points.is_empty():
+		print("Warning: No spawn points found!")
 		return
-	var spawn_point := spawn_points.pick_random() as Node3D
-	var zombie = zombie_scene.instantiate()
-	zombie.global_position = spawn_point.global_position
+	var spawn_point: Node3D = spawn_points.pick_random()
+	var zombie: Node3D = zombie_scene.instantiate() as Node3D
+	zombie.position = spawn_point.global_position
 	get_tree().current_scene.add_child(zombie)
+	zombie.set_round_difficulty(GameManager.current_round)
+	if GameManager.players.size() > 0:
+		zombie.set_target(GameManager.players[0] as Node3D)
 	active_zombies.append(zombie)
 	zombie.killed.connect(_on_zombie_killed)
 	zombie_spawned.emit(zombie)

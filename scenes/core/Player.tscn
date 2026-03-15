@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://b1player"]
+[gd_scene load_steps=5 format=3 uid="uid://b1player"]
 
 [ext_resource type="Script" path="res://scripts/player/PlayerController.gd" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://b1weapon" path="res://scenes/weapons/BaseWeapon.tscn" id="2_weapon"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -10,6 +11,8 @@ height = 1.8
 size = Vector3(1.0, 1.0, 1.0)
 
 [node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 5
 script = ExtResource("1_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -20,3 +23,6 @@ shape = SubResource("CapsuleShape3D_1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+
+[node name="BaseWeapon" parent="Head/Camera3D" instance=ExtResource("2_weapon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.3, -0.5)

@@ -7,7 +7,7 @@ signal game_started()
 signal game_over()
 
 var current_round: int = 1
-var players: Array = []
+var players: Array[Node] = []
 var game_active: bool = false
 var round_in_progress: bool = false
 var player_data: Dictionary = {}

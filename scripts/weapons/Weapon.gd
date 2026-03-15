@@ -29,7 +29,7 @@ func equip(player: PlayerController):
 	owner_player = player
 
 func _process(delta: float):
-	fire_timer = max(fire_timer - delta, 0.0)
+	fire_timer = maxf(fire_timer - delta, 0.0)
 
 	if is_reloading:
 		return
@@ -71,7 +71,7 @@ func reload():
 	reloaded.emit()
 	await get_tree().create_timer(reload_time).timeout
 	var needed := mag_size - current_ammo
-	var to_add := min(needed, reserve_ammo)
+	var to_add: int = mini(needed, reserve_ammo)
 	current_ammo += to_add
 	reserve_ammo -= to_add
 	is_reloading = false

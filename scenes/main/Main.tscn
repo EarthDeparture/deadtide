@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://b1main"]
+[gd_scene load_steps=5 format=3 uid="uid://b1main"]
 
 [ext_resource type="Script" path="res://scripts/main/Main.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://b1map" path="res://scenes/maps/PrototypeMap.tscn" id="2_map"]
 [ext_resource type="PackedScene" uid="uid://b1player" path="res://scenes/core/Player.tscn" id="3_player"]
+[ext_resource type="PackedScene" uid="uid://b1hud" path="res://scenes/ui/HUD.tscn" id="4_hud"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -10,7 +11,7 @@ script = ExtResource("1_main")
 [node name="PrototypeMap" parent="." instance=ExtResource("2_map")]
 
 [node name="Player" parent="." instance=ExtResource("3_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 10, 0)
@@ -18,3 +19,5 @@ light_energy = 0.8
 shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]
