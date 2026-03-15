@@ -3,6 +3,8 @@ extends CharacterBody3D
 
 signal damaged(damage: int, health: int)
 signal died()
+signal interact_prompt_changed(text: String)
+signal weapon_equipped(weapon: Node3D)
 
 const GRAVITY: float = 9.8
 const WALK_SPEED: float = 5.0
@@ -13,6 +15,8 @@ var current_health: int = 100
 var max_health: int = 100
 var player_id: int = 0
 var is_dead: bool = false
+var perks: Array[String] = []
+var nearby_interactable: Node = null
 
 @export var sensitivity: float = 0.003
 
@@ -23,6 +27,7 @@ var mouse_captured: bool = false
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var head: Node3D = $Head
 @onready var weapon: Weapon = $Head/Camera3D/BaseWeapon
+@onready var interact_area: Area3D = $InteractArea
 
 func _ready():
 	player_id = get_instance_id()
@@ -31,6 +36,8 @@ func _ready():
 	GameManager.add_player(self)
 	add_weapon(weapon)
 	weapon.equip(self)
+	interact_area.area_entered.connect(_on_interact_area_entered)
+	interact_area.area_exited.connect(_on_interact_area_exited)
 
 func _input(event: InputEvent):
 	if event.is_action_pressed("ui_cancel"):
@@ -46,6 +53,9 @@ func _input(event: InputEvent):
 		head.rotation.x = clamp(head.rotation.x, -PI / 2, PI / 2)
 
 func _physics_process(delta: float):
+	if Input.is_action_just_pressed("interact") and nearby_interactable != null:
+		nearby_interactable.interact(self)
+
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
 
@@ -100,3 +110,31 @@ func equip_weapon(weapon: Node3D):
 		current_weapon.visible = false
 	current_weapon = weapon
 	current_weapon.visible = true
+	weapon_equipped.emit(weapon)
+
+func _on_interact_area_entered(area: Area3D) -> void:
+	var parent: Node = area.get_parent()
+	if parent != null and parent.has_method("get_prompt"):
+		nearby_interactable = parent
+		interact_prompt_changed.emit(parent.get_prompt())
+
+func _on_interact_area_exited(area: Area3D) -> void:
+	var parent: Node = area.get_parent()
+	if parent == nearby_interactable:
+		nearby_interactable = null
+		interact_prompt_changed.emit("")
+
+func buy_perk(perk_name: String) -> void:
+	if perks.has(perk_name):
+		return
+	perks.append(perk_name)
+	match perk_name:
+		"juggernaut":
+			max_health = 200
+			current_health = 200
+			damaged.emit(0, current_health)
+		"speed_cola":
+			if current_weapon is Weapon:
+				(current_weapon as Weapon).reload_time *= 0.5
+		"quick_revive":
+			pass

@@ -1,6 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://b1map"]
+[gd_scene load_steps=22 format=3 uid="uid://b1map"]
 
 [ext_resource type="Script" path="res://scripts/maps/PrototypeMap.gd" id="1_map"]
+[ext_resource type="PackedScene" uid="uid://b1wallbuy" path="res://scenes/interactables/WallBuy.tscn" id="2_wb"]
+[ext_resource type="PackedScene" uid="uid://b1door" path="res://scenes/interactables/Door.tscn" id="3_door"]
+[ext_resource type="PackedScene" uid="uid://b1perk" path="res://scenes/interactables/PerkMachine.tscn" id="4_perk"]
+[ext_resource type="PackedScene" uid="uid://b1weapon" path="res://scenes/weapons/BaseWeapon.tscn" id="5_weapon"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(20, 1, 20)
@@ -26,6 +30,18 @@ size = Vector3(1, 4, 20)
 [sub_resource type="StandardMaterial3D" id="Mat_wall"]
 albedo_color = Color(0.22, 0.22, 0.22, 1)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_divwall"]
+size = Vector3(1, 4, 8.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_divwall"]
+size = Vector3(1, 4, 8.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns2"]
+size = Vector3(20, 4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ns2"]
+size = Vector3(20, 4, 1)
+
 [node name="PrototypeMap" type="Node3D"]
 script = ExtResource("1_map")
 
@@ -36,6 +52,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_floor")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("BoxMesh_floor")
+surface_material_override/0 = SubResource("Mat_floor")
+
+[node name="Floor2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 mesh = SubResource("BoxMesh_floor")
 surface_material_override/0 = SubResource("Mat_floor")
@@ -62,16 +90,6 @@ shape = SubResource("BoxShape3D_wall_ns")
 mesh = SubResource("BoxMesh_wall_ns")
 surface_material_override/0 = SubResource("Mat_wall")
 
-[node name="WallEast" type="StaticBody3D" parent="Walls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallEast"]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/WallEast"]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("Mat_wall")
-
 [node name="WallWest" type="StaticBody3D" parent="Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 2, 0)
 
@@ -79,6 +97,56 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 2, 0)
 shape = SubResource("BoxShape3D_wall_ew")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/WallWest"]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="DivWallNorth" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 2, -6.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/DivWallNorth"]
+shape = SubResource("BoxShape3D_divwall")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/DivWallNorth"]
+mesh = SubResource("BoxMesh_divwall")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="DivWallSouth" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 2, 6.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/DivWallSouth"]
+shape = SubResource("BoxShape3D_divwall")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/DivWallSouth"]
+mesh = SubResource("BoxMesh_divwall")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="WallNorth2" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 2, -10.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallNorth2"]
+shape = SubResource("BoxShape3D_wall_ns2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/WallNorth2"]
+mesh = SubResource("BoxMesh_wall_ns2")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="WallSouth2" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 2, 10.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallSouth2"]
+shape = SubResource("BoxShape3D_wall_ns2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/WallSouth2"]
+mesh = SubResource("BoxMesh_wall_ns2")
+surface_material_override/0 = SubResource("Mat_wall")
+
+[node name="WallEast2" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/WallEast2"]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Walls/WallEast2"]
 mesh = SubResource("BoxMesh_wall_ew")
 surface_material_override/0 = SubResource("Mat_wall")
 
@@ -96,9 +164,54 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.1, 8)
 [node name="SpawnPoint4" type="Node3D" parent="SpawnPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.1, 8)
 
+[node name="SpawnPoint5" type="Node3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0.1, -8)
+
+[node name="SpawnPoint6" type="Node3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 0.1, -8)
+
+[node name="SpawnPoint7" type="Node3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0.1, 8)
+
+[node name="SpawnPoint8" type="Node3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 0.1, 8)
+
+[node name="Interactables" type="Node3D" parent="."]
+
+[node name="WallBuy1" parent="Interactables" instance=ExtResource("2_wb")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -10.0, 0, -5)
+weapon_scene = ExtResource("5_weapon")
+weapon_name = "M1 Carbine"
+weapon_cost = 500
+ammo_cost = 250
+ammo_amount = 30
+
+[node name="WallBuy2" parent="Interactables" instance=ExtResource("2_wb")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -10.0, 0, 5)
+weapon_scene = ExtResource("5_weapon")
+weapon_name = "Thompson"
+weapon_cost = 1500
+ammo_cost = 500
+ammo_amount = 40
+
+[node name="Door1" parent="Interactables" instance=ExtResource("3_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0, 0)
+cost = 750
+label = "Open Door"
+
+[node name="JuggerNog" parent="Interactables" instance=ExtResource("4_perk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, -8)
+perk_name = "juggernaut"
+cost = 2500
+
 [node name="Doors" type="Node3D" parent="."]
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+omni_range = 20.0
+light_energy = 1.5
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 5, 0)
 omni_range = 20.0
 light_energy = 1.5

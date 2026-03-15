@@ -5,9 +5,12 @@ extends CanvasLayer
 @onready var ammo_label: Label = $Control/AmmoLabel
 @onready var round_label: Label = $Control/RoundLabel
 @onready var reload_label: Label = $Control/ReloadLabel
+@onready var interact_label: Label = $Control/InteractLabel
 @onready var damage_flash: ColorRect = $Control/DamageFlash
 @onready var round_banner: Label = $Control/RoundBanner
 @onready var game_over_panel: ColorRect = $Control/GameOverPanel
+
+var _connected_weapon: Node = null
 
 const FLASH_ALPHA: float = 0.4
 const FLASH_FADE_SPEED: float = 2.0
@@ -25,10 +28,11 @@ func _ready():
 	round_label.text = "ROUND %d" % GameManager.current_round
 
 	var player = get_node_or_null("/root/Main/Player")
-	if player and player.current_weapon:
-		player.current_weapon.ammo_changed.connect(_on_ammo_changed)
-		player.current_weapon.reloaded.connect(_on_reload_started)
-		_on_ammo_changed(player.current_weapon.current_ammo, player.current_weapon.reserve_ammo)
+	if player:
+		player.interact_prompt_changed.connect(_on_interact_prompt_changed)
+		player.weapon_equipped.connect(_on_weapon_equipped)
+		if player.current_weapon:
+			_connect_weapon(player.current_weapon)
 
 	if GameManager.players.size() > 0:
 		var pid: int = GameManager.players[0].get_instance_id()
@@ -67,3 +71,24 @@ func _on_ammo_changed(current_ammo: int, total_ammo: int):
 
 func _on_reload_started():
 	reload_label.visible = true
+
+func _on_interact_prompt_changed(text: String) -> void:
+	interact_label.text = text
+	interact_label.visible = text != ""
+
+func _on_weapon_equipped(weapon: Node3D) -> void:
+	_connect_weapon(weapon)
+
+func _connect_weapon(weapon: Node3D) -> void:
+	if _connected_weapon != null and is_instance_valid(_connected_weapon) and _connected_weapon is Weapon:
+		var old_w := _connected_weapon as Weapon
+		if old_w.ammo_changed.is_connected(_on_ammo_changed):
+			old_w.ammo_changed.disconnect(_on_ammo_changed)
+		if old_w.reloaded.is_connected(_on_reload_started):
+			old_w.reloaded.disconnect(_on_reload_started)
+	_connected_weapon = weapon
+	if weapon is Weapon:
+		var w := weapon as Weapon
+		w.ammo_changed.connect(_on_ammo_changed)
+		w.reloaded.connect(_on_reload_started)
+		_on_ammo_changed(w.current_ammo, w.reserve_ammo)
