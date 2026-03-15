@@ -10,7 +10,8 @@ const SPRINT_SPEED: float = 4.5
 const PROXIMITY_SPRINT_RANGE: float = 4.0
 const ATTACK_DAMAGE: int = 25
 const ATTACK_COOLDOWN: float = 1.5
-const BASE_COLOR := Color(0.15, 0.45, 0.1, 1)
+const BASE_COLOR := Color(0.28, 0.22, 0.16, 1)
+const BASE_HEAD_COLOR := Color(0.32, 0.25, 0.18, 1)
 const HIT_COLOR := Color(1.0, 0.1, 0.1, 1)
 
 var health: int = 100
@@ -22,14 +23,18 @@ var round_multiplier: float = 1.0
 var _base_speed: float = WALK_SPEED
 var _round_number: int = 1
 var _mat: StandardMaterial3D = null
+var _head_mat: StandardMaterial3D = null
 
 @onready var attack_area: Area3D = $AttackArea
 @onready var mesh_instance: MeshInstance3D = $MeshInstance3D
+@onready var head_mesh: MeshInstance3D = $HeadMesh
 
 func _ready():
 	attack_area.body_entered.connect(_on_body_entered_attack_area)
 	_mat = mesh_instance.get_active_material(0).duplicate() as StandardMaterial3D
 	mesh_instance.set_surface_override_material(0, _mat)
+	_head_mat = head_mesh.get_active_material(0).duplicate() as StandardMaterial3D
+	head_mesh.set_surface_override_material(0, _head_mat)
 
 func set_round_difficulty(round_number: int):
 	_round_number = round_number
@@ -94,7 +99,11 @@ func _flash_hit() -> void:
 		return
 	_mat.albedo_color = HIT_COLOR
 	var tween := create_tween()
+	tween.set_parallel(true)
 	tween.tween_property(_mat, "albedo_color", BASE_COLOR, 0.2)
+	if _head_mat:
+		_head_mat.albedo_color = HIT_COLOR
+		tween.tween_property(_head_mat, "albedo_color", BASE_HEAD_COLOR, 0.2)
 
 func die(damage_type: String, attacker_id: int):
 	killed.emit(self, damage_type, attacker_id)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://b1zombie"]
+[gd_scene load_steps=9 format=3 uid="uid://b1zombie"]
 
 [ext_resource type="Script" path="res://scripts/enemies/ZombieAI.gd" id="1_zombie"]
 
@@ -14,7 +14,14 @@ radius = 0.4
 height = 1.8
 
 [sub_resource type="StandardMaterial3D" id="Mat_zombie"]
-albedo_color = Color(0.15, 0.45, 0.1, 1)
+albedo_color = Color(0.28, 0.22, 0.16, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.22
+height = 0.44
+
+[sub_resource type="StandardMaterial3D" id="Mat_zombie_head"]
+albedo_color = Color(0.32, 0.25, 0.18, 1)
 
 [node name="Zombie" type="CharacterBody3D"]
 collision_layer = 4
@@ -29,6 +36,11 @@ shape = SubResource("CapsuleShape3D_1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("CapsuleMesh_1")
 surface_material_override/0 = SubResource("Mat_zombie")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.02, 0)
+mesh = SubResource("SphereMesh_head")
+surface_material_override/0 = SubResource("Mat_zombie_head")
 
 [node name="AttackArea" type="Area3D" parent="."]
 collision_layer = 0
