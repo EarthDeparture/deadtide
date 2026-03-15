@@ -34,12 +34,13 @@ func _new_player(vol_db: float) -> AudioStreamPlayer:
 func play(id: String) -> void:
 	if not _streams.has(id):
 		return
+	var s := _streams[id] as AudioStreamWAV
 	for p in _pool:
 		if not p.playing:
-			p.stream = _streams[id]
+			p.stream = s
 			p.play()
 			return
-	_pool[0].stream = _streams[id]
+	_pool[0].stream = s
 	_pool[0].play()
 
 # ── Sound generation ───────────────────────────────────────────────────
@@ -117,7 +118,7 @@ func _tone(dur: float, hz_a: float, hz_b: float, decay: float, vol: float) -> Au
 	var ph := 0.0
 	for i in n:
 		var t  := float(i) / float(n)
-		var hz := lerp(hz_a, hz_b, t)
+		var hz := lerpf(hz_a, hz_b, t)
 		ph += TAU * hz / RATE
 		var s := sin(ph) * pow(1.0 - t, decay) * vol
 		d.encode_s16(i * 2, int(clamp(s, -1.0, 1.0) * 32767))
@@ -132,14 +133,14 @@ func _moan(dur: float, hz_start: float, hz_end: float, vol: float) -> AudioStrea
 	for i in n:
 		var t   := float(i) / float(n)
 		var env := sin(PI * t) * vol
-		var hz  := lerp(hz_start, hz_end, t)
+		var hz  := lerpf(hz_start, hz_end, t)
 		ph += TAU * hz / RATE
 		var raw := sin(ph) * 0.75 + randf_range(-1.0, 1.0) * 0.25
 		var s   := tanh(raw * 2.5) * env * 0.5
 		d.encode_s16(i * 2, int(clamp(s, -1.0, 1.0) * 32767))
 	return _wav(d)
 
-func _arp(freqs: Array, note_dur: float, vol: float) -> AudioStreamWAV:
+func _arp(freqs: Array[float], note_dur: float, vol: float) -> AudioStreamWAV:
 	var spn := int(RATE * note_dur)
 	var n   := spn * freqs.size()
 	var d   := PackedByteArray()
@@ -149,7 +150,7 @@ func _arp(freqs: Array, note_dur: float, vol: float) -> AudioStreamWAV:
 		var ni  := mini(i / spn, freqs.size() - 1)
 		var tn  := float(i % spn) / float(spn)
 		var env := sin(PI * tn) * vol
-		ph += TAU * float(freqs[ni]) / RATE
+		ph += TAU * freqs[ni] / RATE
 		var s := sin(ph) * env
 		d.encode_s16(i * 2, int(clamp(s, -1.0, 1.0) * 32767))
 	return _wav(d)
@@ -173,9 +174,8 @@ func _rifle(dur: float, vol: float) -> AudioStreamWAV:
 		d.encode_s16(i * 2, int(clamp(s, -1.0, 1.0) * 32767))
 	return _wav(d)
 
-func _clicks(times: Array, click_dur: float, hz: float, vol: float) -> AudioStreamWAV:
-	var last  : float = times[-1]
-	var total := int(RATE * (last + click_dur + 0.08))
+func _clicks(times: Array[float], click_dur: float, hz: float, vol: float) -> AudioStreamWAV:
+	var total := int(RATE * (times[-1] + click_dur + 0.08))
 	var d     := PackedByteArray()
 	d.resize(total * 2)
 	var csamp := int(RATE * click_dur)
@@ -219,13 +219,13 @@ func _connect_signals() -> void:
 func _on_weapon_fired(_pid: int, wname: String) -> void:
 	match wname:
 		"Thompson SMG":
-			_fire_smg.stream = _streams["smg_fire"]
+			_fire_smg.stream = _streams["smg_fire"] as AudioStreamWAV
 			_fire_smg.play()
 		"M1 Garand":
-			_fire_heavy.stream = _streams["rifle_fire"]
+			_fire_heavy.stream = _streams["rifle_fire"] as AudioStreamWAV
 			_fire_heavy.play()
 		_:
-			_fire_light.stream = _streams["carbine_fire"]
+			_fire_light.stream = _streams["carbine_fire"] as AudioStreamWAV
 			_fire_light.play()
 
 func _on_hit_registered(_pid: int, is_headshot: bool) -> void:

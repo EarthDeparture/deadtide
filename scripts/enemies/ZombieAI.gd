@@ -8,7 +8,7 @@ const WALK_SPEED: float = 1.4
 const RUN_SPEED: float = 2.8
 const SPRINT_SPEED: float = 4.5
 const PROXIMITY_SPRINT_RANGE: float = 4.0
-const ATTACK_DAMAGE: int = 25
+const ATTACK_DAMAGE: int = 50
 const ATTACK_COOLDOWN: float = 1.5
 const BASE_COLOR := Color(0.28, 0.22, 0.16, 1)
 const BASE_HEAD_COLOR := Color(0.32, 0.25, 0.18, 1)
@@ -41,7 +41,15 @@ func _ready():
 func set_round_difficulty(round_number: int):
 	_round_number = round_number
 	round_multiplier = 1.0 + (round_number * 0.1)
-	health = int(max_health * round_multiplier)
+	# WaW-accurate health formula:
+	# Rounds 1-9: 150 + 100*(round-1)
+	# Round 10+:  950 * 1.1^(round-9)
+	if round_number <= 1:
+		health = 150
+	elif round_number <= 9:
+		health = 150 + 100 * (round_number - 1)
+	else:
+		health = int(950.0 * pow(1.1, round_number - 9))
 	max_health = health
 
 	if round_number >= 13:
@@ -91,8 +99,7 @@ func _on_body_entered_attack_area(body: Node):
 func _attack(player):
 	is_attacking = true
 	attack_cooldown_timer = ATTACK_COOLDOWN
-	var damage: int = int(ATTACK_DAMAGE * round_multiplier)
-	player.take_damage(damage)
+	player.take_damage(ATTACK_DAMAGE)
 	EventBus.zombie_attacked.emit(self, player)
 
 func take_damage(amount: int, damage_type: String, attacker_id: int):

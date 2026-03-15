@@ -14,6 +14,10 @@ const JUMP_VELOCITY: float = 4.5
 
 var current_health: int = 100
 var max_health: int = 100
+var _regen_timer: float = 0.0
+var _regen_accum: float = 0.0
+const REGEN_DELAY: float = 5.0
+const REGEN_RATE: float = 30.0
 var player_id: int = 0
 var is_dead: bool = false
 var perks: Array[String] = []
@@ -41,7 +45,6 @@ const REVIVE_TIME: float = 5.0
 
 var current_weapon: Node3D = null
 var weapons: Array[Node3D] = []
-var mouse_captured: bool = false
 
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var head: Node3D = $Head
@@ -51,7 +54,6 @@ var mouse_captured: bool = false
 func _ready():
 	player_id = get_instance_id()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	mouse_captured = true
 	GameManager.add_player(self)
 	add_weapon(weapon)
 	weapon.equip(self)
@@ -59,11 +61,7 @@ func _ready():
 	interact_area.area_exited.connect(_on_interact_area_exited)
 
 func _input(event: InputEvent):
-	if event.is_action_pressed("ui_cancel"):
-		mouse_captured = !mouse_captured
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if mouse_captured else Input.MOUSE_MODE_VISIBLE
-
-	if not mouse_captured:
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
 
 	if event is InputEventMouseMotion:
@@ -78,6 +76,16 @@ func _physics_process(delta: float):
 		if _revive_timer <= 0.0:
 			_revive()
 		return
+
+	if _regen_timer > 0.0:
+		_regen_timer -= delta
+	elif current_health < max_health:
+		_regen_accum += REGEN_RATE * delta
+		if _regen_accum >= 1.0:
+			var heal: int = int(_regen_accum)
+			_regen_accum -= float(heal)
+			current_health = mini(current_health + heal, max_health)
+			EventBus.emit_player_healed(player_id, heal, current_health)
 
 	if Input.is_action_just_pressed("interact") and nearby_interactable != null:
 		nearby_interactable.interact(self)
@@ -137,6 +145,8 @@ func _physics_process(delta: float):
 
 func take_damage(amount: int):
 	current_health -= amount
+	_regen_timer = REGEN_DELAY
+	_regen_accum = 0.0
 	_shake_trauma = minf(_shake_trauma + 0.4, 1.0)
 	EventBus.emit_player_damaged(player_id, amount, current_health)
 	damaged.emit(amount, current_health)
@@ -239,8 +249,8 @@ func buy_perk(perk_name: String) -> void:
 	perks.append(perk_name)
 	match perk_name:
 		"juggernaut":
-			max_health = 200
-			current_health = 200
+			max_health = 250
+			current_health = 250
 			damaged.emit(0, current_health)
 		"speed_cola":
 			if current_weapon is Weapon:

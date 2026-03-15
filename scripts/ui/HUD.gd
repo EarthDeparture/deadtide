@@ -65,6 +65,7 @@ func _ready():
 	EventBus.player_revive_tick.connect(_on_revive_tick)
 	EventBus.player_revived.connect(_on_player_revived)
 	EventBus.hit_registered.connect(_on_hit_registered)
+	EventBus.player_healed.connect(_on_player_healed)
 
 	round_label.text = "ROUND %d" % GameManager.current_round
 
@@ -223,6 +224,12 @@ func _on_revive_tick(_player_id: int, time_remaining: float):
 func _on_player_revived(_player_id: int, _reviver_id: int):
 	reload_label.visible = false
 	_update_vignette()
+
+func _on_player_healed(_player_id: int, _amount: int, current_health: int) -> void:
+	var player = get_node_or_null("/root/Main/Player")
+	var max_hp: int = player.max_health if player else 100
+	var ratio: float = float(current_health) / float(max_hp)
+	_set_vignette_intensity(clamp(1.0 - ratio, 0.0, 1.0))
 
 func _on_interact_prompt_changed(text: String) -> void:
 	interact_label.text = text

@@ -16,6 +16,9 @@ albedo_color = Color(0.38, 0.26, 0.12, 1)
 
 [node name="BaseWeapon" type="Node3D"]
 script = ExtResource("1_weapon")
+weapon_name = "M1911"
+damage = 20
+headshot_multiplier = 1.4
 
 [node name="ShootOrigin" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)

@@ -23,6 +23,7 @@ var _dry_fire_timer: float = 0.0
 
 @export var spread: float = 0.03
 @export var recoil_amount: float = 0.03
+@export var headshot_multiplier: float = 2.0
 
 @onready var shoot_origin: Node3D = $ShootOrigin
 @onready var _muzzle_light: OmniLight3D = get_node_or_null("ShootOrigin/MuzzleLight")
@@ -76,11 +77,12 @@ func fire():
 	var result := space_state.intersect_ray(query)
 	if result and result.collider.has_method("take_damage"):
 		var pid := owner_player.player_id if owner_player != null else 0
-		var actual_damage: int = 99999 if GameManager.insta_kill_active else damage
 		var damage_type: String = "body"
 		if result.position.y > result.collider.global_position.y + 1.2:
 			damage_type = "headshot"
 			EventBus.emit_headshot_hit(pid)
+		var base_damage: int = damage if damage_type == "body" else int(damage * headshot_multiplier)
+		var actual_damage: int = 99999 if GameManager.insta_kill_active else base_damage
 		result.collider.take_damage(actual_damage, damage_type, pid)
 		EventBus.emit_hit_registered(pid, damage_type == "headshot")
 
