@@ -31,7 +31,7 @@ func _spawn_zombie():
 		print("Warning: No spawn points registered!")
 		return
 	var spawn_point: Node3D = spawn_points.pick_random()
-	var zombie: ZombieAI = zombie_scene.instantiate()
+	var zombie = zombie_scene.instantiate()
 	zombie.global_position = spawn_point.global_position
 	get_tree().current_scene.add_child(zombie)
 	active_zombies.append(zombie)

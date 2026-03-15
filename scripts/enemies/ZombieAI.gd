@@ -3,7 +3,6 @@ extends CharacterBody3D
 
 signal killed(zombie: Node, damage_type: String, player_id: int)
 
-const WALK_SPEED = 2.0
 const RUN_SPEED = 4.0
 const ATTACK_DAMAGE = 25
 const ATTACK_COOLDOWN = 1.5
@@ -49,10 +48,11 @@ func _physics_process(delta: float):
 			is_attacking = false
 
 func _on_body_entered_attack_area(body: Node):
-	if body is PlayerController and not is_attacking:
+	# Duck-typed check — avoids hard compile dependency on PlayerController
+	if body.has_method("take_damage") and not is_attacking:
 		_attack(body)
 
-func _attack(player: PlayerController):
+func _attack(player: Node):
 	is_attacking = true
 	attack_cooldown_timer = ATTACK_COOLDOWN
 	var damage := int(ATTACK_DAMAGE * round_multiplier)
