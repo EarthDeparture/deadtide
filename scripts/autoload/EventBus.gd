@@ -85,3 +85,6 @@ func emit_zombie_died(damage_type: String) -> void:
 
 func emit_zombie_idle() -> void:
 	zombie_idle.emit()
+
+func emit_window_repaired(window_id: String, points: int) -> void:
+	window_repaired.emit(window_id, points)

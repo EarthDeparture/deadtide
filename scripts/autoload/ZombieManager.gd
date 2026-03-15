@@ -9,11 +9,13 @@ const HEADSHOT_POINTS = 100
 const KNIFE_POINTS = 130
 const HIT_POINTS: int = 10
 const POWERUP_DROP_CHANCE: float = 0.1
+const MAX_ZOMBIES: int = 24
 
 var active_zombies: Array[Node] = []
 var zombie_scene: PackedScene
 var _powerup_scene: PackedScene
 var spawn_points: Array[Node3D] = []
+var windows: Array[WindowBarricade] = []
 
 func _ready():
 	print("ZombieManager initialized")
@@ -23,6 +25,9 @@ func _ready():
 func register_spawn_point(spawn_point: Node3D):
 	spawn_points.append(spawn_point)
 
+func register_window(w: WindowBarricade) -> void:
+	windows.append(w)
+
 func spawn_wave(round_number: int):
 	var zombie_count: int = 6 + (4 * round_number)
 	print("Spawning ", zombie_count, " zombies for round ", round_number)
@@ -31,19 +36,49 @@ func spawn_wave(round_number: int):
 		await get_tree().create_timer(0.5).timeout
 
 func _spawn_zombie():
-	if spawn_points.is_empty():
-		for sp in get_tree().get_nodes_in_group("spawn_points"):
-			spawn_points.append(sp as Node3D)
-	if spawn_points.is_empty():
-		print("Warning: No spawn points found!")
+	if active_zombies.size() >= MAX_ZOMBIES:
 		return
-	var spawn_point: Node3D = spawn_points.pick_random()
+
 	var zombie: Node3D = zombie_scene.instantiate() as Node3D
-	zombie.position = spawn_point.global_position
-	get_tree().current_scene.add_child(zombie)
-	zombie.set_round_difficulty(GameManager.current_round)
-	if GameManager.players.size() > 0:
-		zombie.set_target(GameManager.players[0] as Node3D)
+
+	var active_windows: Array = []
+	for w in windows:
+		if is_instance_valid(w) and w.is_active:
+			active_windows.append(w)
+
+	if not active_windows.is_empty():
+		# Prefer windows without a zombie queued
+		var available: Array = []
+		for w in active_windows:
+			if w.zombie_at_window == null:
+				available.append(w)
+		var chosen: WindowBarricade
+		if not available.is_empty():
+			chosen = available.pick_random() as WindowBarricade
+		else:
+			chosen = active_windows.pick_random() as WindowBarricade
+		zombie.position = chosen.get_exterior_spawn_position()
+		get_tree().current_scene.add_child(zombie)
+		zombie.set_round_difficulty(GameManager.current_round)
+		if GameManager.players.size() > 0:
+			zombie.set_target(GameManager.players[0] as Node3D)
+		zombie.set_target_window(chosen)
+	else:
+		# Fallback: legacy spawn point behavior
+		if spawn_points.is_empty():
+			for sp in get_tree().get_nodes_in_group("spawn_points"):
+				spawn_points.append(sp as Node3D)
+		if spawn_points.is_empty():
+			print("Warning: No spawn points found!")
+			zombie.queue_free()
+			return
+		var spawn_point: Node3D = spawn_points.pick_random()
+		zombie.position = spawn_point.global_position
+		get_tree().current_scene.add_child(zombie)
+		zombie.set_round_difficulty(GameManager.current_round)
+		if GameManager.players.size() > 0:
+			zombie.set_target(GameManager.players[0] as Node3D)
+
 	active_zombies.append(zombie)
 	zombie.killed.connect(_on_zombie_killed)
 	zombie.hit.connect(_on_zombie_hit)

@@ -1,15 +1,24 @@
-[gd_scene load_steps=4 format=3 uid="uid://b1smg"]
+[gd_scene load_steps=7 format=3 uid="uid://b1smg"]
 
 [ext_resource type="Script" path="res://scripts/weapons/Weapon.gd" id="1_weapon"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_body"]
-size = Vector3(0.08, 0.065, 0.26)
+size = Vector3(0.075, 0.060, 0.26)
+
+[sub_resource type="BoxMesh" id="BoxMesh_barrel"]
+size = Vector3(0.026, 0.026, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_stock"]
+size = Vector3(0.065, 0.055, 0.09)
 
 [sub_resource type="BoxMesh" id="BoxMesh_mag"]
-size = Vector3(0.09, 0.09, 0.055)
+size = Vector3(0.088, 0.092, 0.056)
 
 [sub_resource type="StandardMaterial3D" id="Mat_metal"]
 albedo_color = Color(0.12, 0.11, 0.10, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.38, 0.26, 0.12, 1)
 
 [node name="SMG" type="Node3D"]
 script = ExtResource("1_weapon")
@@ -32,11 +41,21 @@ omni_range = 2.0
 visible = false
 
 [node name="GunBody" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.11)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.005, -0.11)
 mesh = SubResource("BoxMesh_body")
 surface_material_override/0 = SubResource("Mat_metal")
 
+[node name="Barrel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, -0.42)
+mesh = SubResource("BoxMesh_barrel")
+surface_material_override/0 = SubResource("Mat_metal")
+
+[node name="GunStock" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.008, 0.10)
+mesh = SubResource("BoxMesh_stock")
+surface_material_override/0 = SubResource("Mat_wood")
+
 [node name="DrumMag" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.085, -0.08)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.078, -0.10)
 mesh = SubResource("BoxMesh_mag")
 surface_material_override/0 = SubResource("Mat_metal")

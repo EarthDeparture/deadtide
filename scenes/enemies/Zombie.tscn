@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://b1zombie"]
+[gd_scene load_steps=13 format=3 uid="uid://b1zombie"]
 
 [ext_resource type="Script" path="res://scripts/enemies/ZombieAI.gd" id="1_zombie"]
 
@@ -14,14 +14,21 @@ radius = 0.4
 height = 1.8
 
 [sub_resource type="StandardMaterial3D" id="Mat_zombie"]
-albedo_color = Color(0.28, 0.22, 0.16, 1)
+albedo_color = Color(0.22, 0.20, 0.17, 1)
 
 [sub_resource type="SphereMesh" id="SphereMesh_head"]
-radius = 0.22
-height = 0.44
+radius = 0.24
+height = 0.48
 
 [sub_resource type="StandardMaterial3D" id="Mat_zombie_head"]
-albedo_color = Color(0.32, 0.25, 0.18, 1)
+albedo_color = Color(0.24, 0.22, 0.18, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_arm"]
+radius = 0.09
+height = 0.65
+
+[sub_resource type="StandardMaterial3D" id="Mat_zombie_arm"]
+albedo_color = Color(0.19, 0.18, 0.15, 1)
 
 [node name="Zombie" type="CharacterBody3D"]
 collision_layer = 4
@@ -41,6 +48,16 @@ surface_material_override/0 = SubResource("Mat_zombie")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.02, 0)
 mesh = SubResource("SphereMesh_head")
 surface_material_override/0 = SubResource("Mat_zombie_head")
+
+[node name="LeftArm" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, -0.46, 1.12, -0.16)
+mesh = SubResource("CapsuleMesh_arm")
+surface_material_override/0 = SubResource("Mat_zombie_arm")
+
+[node name="RightArm" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, 0.46, 1.12, -0.16)
+mesh = SubResource("CapsuleMesh_arm")
+surface_material_override/0 = SubResource("Mat_zombie_arm")
 
 [node name="AttackArea" type="Area3D" parent="."]
 collision_layer = 0

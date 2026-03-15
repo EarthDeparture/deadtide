@@ -54,11 +54,11 @@ func _gen_all() -> void:
 	_streams["dry_fire"]     = _noise(0.05, 2400.0, 0.04, 8.0, 0.50)
 	_streams["reload"]       = _clicks([0.00, 0.30], 0.055, 2200.0, 0.65)
 
-	# Zombies
-	_streams["zombie_growl"]  = _moan(0.90,  95.0,  70.0, 0.55)
-	_streams["zombie_hurt"]   = _moan(0.22, 180.0, 130.0, 0.70)
-	_streams["zombie_death"]  = _moan(1.20, 200.0,  52.0, 0.90)
-	_streams["zombie_attack"] = _moan(0.28, 260.0, 200.0, 0.78)
+	# Zombies — use _groan for richer multi-harmonic texture at lower volume
+	_streams["zombie_growl"]  = _groan(1.10,  75.0,  62.0, 0.30, 0.28)
+	_streams["zombie_hurt"]   = _groan(0.30, 165.0, 105.0, 0.48, 0.40)
+	_streams["zombie_death"]  = _groan(1.50, 185.0,  44.0, 0.38, 0.44)
+	_streams["zombie_attack"] = _groan(0.30, 245.0, 195.0, 0.52, 0.42)
 
 	# Player
 	_streams["player_hurt"]   = _noise(0.20, 260.0, 0.38, 2.5, 0.62)
@@ -137,6 +137,35 @@ func _moan(dur: float, hz_start: float, hz_end: float, vol: float) -> AudioStrea
 		ph += TAU * hz / RATE
 		var raw := sin(ph) * 0.75 + randf_range(-1.0, 1.0) * 0.25
 		var s   := tanh(raw * 2.5) * env * 0.5
+		d.encode_s16(i * 2, int(clamp(s, -1.0, 1.0) * 32767))
+	return _wav(d)
+
+func _groan(dur: float, hz_start: float, hz_end: float, rasp: float, vol: float) -> AudioStreamWAV:
+	# Multi-harmonic zombie vocal: fundamental + detuned 2nd + 3rd, with tremolo
+	var n      := int(RATE * dur)
+	var d      := PackedByteArray()
+	d.resize(n * 2)
+	var ph1    := 0.0
+	var ph2    := 0.0
+	var ph3    := 0.0
+	var ph_lfo := 0.0
+	for i in n:
+		var t   := float(i) / float(n)
+		# Fast attack (8%), sustain, tail release (25%)
+		var env := 1.0
+		if t < 0.08:
+			env = t / 0.08
+		elif t > 0.75:
+			env = (1.0 - t) / 0.25
+		var hz := lerpf(hz_start, hz_end, t)
+		ph1    += TAU * hz         / RATE
+		ph2    += TAU * (hz * 2.07) / RATE   # slightly sharp 2nd adds organic roughness
+		ph3    += TAU * (hz * 3.0)  / RATE
+		ph_lfo += TAU * 3.8         / RATE   # 3.8 Hz breathing tremolo
+		var trem := 0.87 + 0.13 * sin(ph_lfo)
+		var tone := sin(ph1) * 0.58 + sin(ph2) * 0.28 + sin(ph3) * 0.14
+		var raw  := tone * (1.0 - rasp) + randf_range(-1.0, 1.0) * rasp
+		var s    := tanh(raw * 2.1) * env * trem * vol
 		d.encode_s16(i * 2, int(clamp(s, -1.0, 1.0) * 32767))
 	return _wav(d)
 

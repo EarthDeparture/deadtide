@@ -89,6 +89,8 @@ func _physics_process(delta: float):
 
 	if Input.is_action_just_pressed("interact") and nearby_interactable != null:
 		nearby_interactable.interact(self)
+		if is_instance_valid(nearby_interactable) and nearby_interactable.has_method("get_prompt"):
+			interact_prompt_changed.emit(nearby_interactable.get_prompt())
 
 	if weapons.size() > 1:
 		if Input.is_action_just_pressed("weapon_1"):
