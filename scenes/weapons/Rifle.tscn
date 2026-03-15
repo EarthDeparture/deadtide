@@ -17,7 +17,7 @@ albedo_color = Color(0.38, 0.26, 0.12, 1)
 [node name="Rifle" type="Node3D"]
 script = ExtResource("1_weapon")
 weapon_name = "M1 Garand"
-damage = 70
+damage = 150
 fire_rate = 0.6
 reload_time = 3.0
 mag_size = 5

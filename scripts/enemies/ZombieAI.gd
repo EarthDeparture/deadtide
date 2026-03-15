@@ -99,7 +99,9 @@ func _on_body_entered_attack_area(body: Node):
 func _attack(player):
 	is_attacking = true
 	attack_cooldown_timer = ATTACK_COOLDOWN
-	player.take_damage(ATTACK_DAMAGE)
+	# WaW-accurate: 50 dmg R1-5 (2-hit down), 100 dmg R6+ (1-hit down without Juggernog)
+	var damage: int = 100 if _round_number >= 6 else ATTACK_DAMAGE
+	player.take_damage(damage)
 	EventBus.zombie_attacked.emit(self, player)
 
 func take_damage(amount: int, damage_type: String, attacker_id: int):
