@@ -5,9 +5,20 @@ extends CanvasLayer
 @onready var ammo_label: Label = $Control/AmmoLabel
 @onready var round_label: Label = $Control/RoundLabel
 @onready var reload_label: Label = $Control/ReloadLabel
+@onready var damage_flash: ColorRect = $Control/DamageFlash
+@onready var round_banner: Label = $Control/RoundBanner
+@onready var game_over_panel: ColorRect = $Control/GameOverPanel
+
+const FLASH_ALPHA: float = 0.4
+const FLASH_FADE_SPEED: float = 2.0
+const ROUND_BANNER_DURATION: float = 3.0
+
+var _flash_alpha: float = 0.0
 
 func _ready():
 	GameManager.round_started.connect(_on_round_started)
+	GameManager.round_ended.connect(_on_round_ended)
+	GameManager.game_over.connect(_on_game_over)
 	GameManager.player_points_changed.connect(_on_points_changed)
 	EventBus.player_damaged.connect(_on_player_damaged)
 
@@ -23,14 +34,32 @@ func _ready():
 		var pid: int = GameManager.players[0].get_instance_id()
 		points_label.text = "POINTS\n%d" % GameManager.get_player_points(pid)
 
+func _process(delta: float):
+	if _flash_alpha > 0.0:
+		_flash_alpha -= FLASH_FADE_SPEED * delta
+		if _flash_alpha < 0.0:
+			_flash_alpha = 0.0
+		damage_flash.color = Color(0.8, 0.0, 0.0, _flash_alpha)
+
 func _on_round_started(round_number: int):
 	round_label.text = "ROUND %d" % round_number
+
+func _on_round_ended(round_number: int):
+	round_banner.text = "ROUND %d COMPLETE\nNext round in 10s" % round_number
+	round_banner.visible = true
+	await get_tree().create_timer(ROUND_BANNER_DURATION).timeout
+	round_banner.visible = false
+
+func _on_game_over():
+	game_over_panel.visible = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _on_points_changed(_player_id: int, points: int):
 	points_label.text = "POINTS\n%d" % points
 
 func _on_player_damaged(_player_id: int, _damage: int, current_health: int):
 	health_label.text = "HEALTH\n%d" % current_health
+	_flash_alpha = FLASH_ALPHA
 
 func _on_ammo_changed(current_ammo: int, total_ammo: int):
 	ammo_label.text = "%d / %d" % [current_ammo, total_ammo]

@@ -12,6 +12,7 @@ const JUMP_VELOCITY: float = 4.5
 var current_health: int = 100
 var max_health: int = 100
 var player_id: int = 0
+var is_dead: bool = false
 
 @export var sensitivity: float = 0.003
 
@@ -80,8 +81,14 @@ func heal(amount: int):
 	current_health = mini(current_health + amount, max_health)
 
 func die():
+	if is_dead:
+		return
+	is_dead = true
 	died.emit()
 	GameManager.set_player_downed(player_id, true)
+	set_process(false)
+	set_physics_process(false)
+	set_process_input(false)
 
 func add_weapon(weapon: Node3D):
 	weapons.append(weapon)

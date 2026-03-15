@@ -70,6 +70,7 @@ func set_player_downed(player_id: int, downed: bool):
 		player_data[player_id]["is_downed"] = downed
 		if downed:
 			EventBus.emit_player_downed(player_id)
+			check_game_over()
 
 func revive_player(player_id: int, reviver_id: int):
 	if player_data.has(player_id):
