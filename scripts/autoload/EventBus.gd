@@ -8,6 +8,7 @@ signal player_revived(player_id: int, reviver_id: int)
 signal player_revive_tick(player_id: int, time_remaining: float)
 
 # Weapon events
+signal hit_registered(player_id: int, is_headshot: bool)
 signal headshot_hit(player_id: int)
 signal weapon_fired(player_id: int, weapon_name: String)
 signal weapon_reloaded(player_id: int, weapon_name: String)
@@ -39,6 +40,9 @@ func emit_player_downed(player_id: int):
 
 func emit_player_revived(player_id: int, reviver_id: int):
 	player_revived.emit(player_id, reviver_id)
+
+func emit_hit_registered(player_id: int, is_headshot: bool) -> void:
+	hit_registered.emit(player_id, is_headshot)
 
 func emit_headshot_hit(player_id: int):
 	headshot_hit.emit(player_id)

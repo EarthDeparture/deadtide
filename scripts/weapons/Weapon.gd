@@ -77,6 +77,7 @@ func fire():
 			damage_type = "headshot"
 			EventBus.emit_headshot_hit(pid)
 		result.collider.take_damage(actual_damage, damage_type, pid)
+		EventBus.emit_hit_registered(pid, damage_type == "headshot")
 
 	if owner_player != null:
 		EventBus.emit_weapon_fired(owner_player.player_id, weapon_name)

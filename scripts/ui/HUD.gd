@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-@onready var health_label: Label = $Control/HealthLabel
 @onready var points_label: Label = $Control/PointsLabel
 @onready var ammo_label: Label = $Control/AmmoLabel
 @onready var round_label: Label = $Control/RoundLabel
@@ -14,18 +13,42 @@ extends CanvasLayer
 @onready var quit_button: Button = $Control/GameOverPanel/GameOverContainer/QuitButton
 @onready var powerup_label: Label = $Control/PowerupLabel
 @onready var weapon_label: Label = $Control/WeaponLabel
-@onready var perks_label: Label = $Control/PerksLabel
 @onready var headshot_label: Label = $Control/HeadshotLabel
+@onready var blood_vignette: ColorRect = $Control/BloodVignette
+@onready var hit_marker: Label = $Control/HitMarker
+@onready var crosshair_top: ColorRect = $Control/CrosshairTop
+@onready var crosshair_bottom: ColorRect = $Control/CrosshairBottom
+@onready var crosshair_left: ColorRect = $Control/CrosshairLeft
+@onready var crosshair_right: ColorRect = $Control/CrosshairRight
+@onready var perks_container: HBoxContainer = $Control/PerksContainer
 
 var _connected_weapon: Node = null
 
 const FLASH_ALPHA: float = 0.4
 const FLASH_FADE_SPEED: float = 2.0
 const ROUND_BANNER_DURATION: float = 3.0
+const HIT_FADE_SPEED: float = 8.0
+const HEADSHOT_FADE_SPEED: float = 1.5
 
 var _flash_alpha: float = 0.0
 var _headshot_alpha: float = 0.0
-const HEADSHOT_FADE_SPEED: float = 1.5
+var _hit_alpha: float = 0.0
+var _crosshair_spread: float = 0.0
+var _last_points: int = 0
+
+const FloatingTextScene = preload("res://scenes/ui/FloatingText.tscn")
+
+const PERK_COLORS: Dictionary = {
+	"juggernaut": Color(0.8, 0.1, 0.1),
+	"quick_revive": Color(0.1, 0.4, 0.9),
+	"speed_cola": Color(0.1, 0.8, 0.2),
+	"double_tap": Color(0.9, 0.5, 0.1),
+	"stamin_up": Color(0.8, 0.8, 0.1)
+}
+const PERK_ABBR: Dictionary = {
+	"juggernaut": "JUG", "quick_revive": "QR",
+	"speed_cola": "SPD", "double_tap": "2×", "stamin_up": "STM"
+}
 
 func _ready():
 	GameManager.round_started.connect(_on_round_started)
@@ -41,6 +64,7 @@ func _ready():
 	EventBus.player_downed.connect(_on_player_downed)
 	EventBus.player_revive_tick.connect(_on_revive_tick)
 	EventBus.player_revived.connect(_on_player_revived)
+	EventBus.hit_registered.connect(_on_hit_registered)
 
 	round_label.text = "ROUND %d" % GameManager.current_round
 
@@ -53,12 +77,13 @@ func _ready():
 			_connect_weapon(player.current_weapon)
 			if player.current_weapon is Weapon:
 				weapon_label.text = (player.current_weapon as Weapon).weapon_name
-		health_label.text = "HEALTH\n%d" % player.current_health
+		_update_vignette()
 	EventBus.headshot_hit.connect(_on_headshot_hit)
 
 	if GameManager.players.size() > 0:
 		var pid: int = GameManager.players[0].get_instance_id()
-		points_label.text = "POINTS\n%d" % GameManager.get_player_points(pid)
+		_last_points = GameManager.get_player_points(pid)
+		points_label.text = "POINTS\n%d" % _last_points
 
 func _process(delta: float):
 	if _flash_alpha > 0.0:
@@ -71,7 +96,41 @@ func _process(delta: float):
 		headshot_label.modulate = Color(1.0, 1.0, 0.0, _headshot_alpha)
 		if _headshot_alpha <= 0.0:
 			headshot_label.visible = false
+	if _hit_alpha > 0.0:
+		_hit_alpha = maxf(_hit_alpha - HIT_FADE_SPEED * delta, 0.0)
+		hit_marker.modulate.a = _hit_alpha
+		if _hit_alpha <= 0.0:
+			hit_marker.visible = false
 	_update_powerup_label()
+	var player = get_node_or_null("/root/Main/Player")
+	var move_spread: float = 0.0
+	if player:
+		move_spread = player.velocity.length() * 0.6
+	_crosshair_spread = move_toward(_crosshair_spread, move_spread, 80.0 * delta)
+	_update_crosshair(_crosshair_spread)
+
+func _update_crosshair(spread: float) -> void:
+	var gap: float = 8.0 + spread
+	crosshair_top.offset_top = -(gap + 8.0)
+	crosshair_top.offset_bottom = -gap
+	crosshair_bottom.offset_top = gap
+	crosshair_bottom.offset_bottom = gap + 8.0
+	crosshair_left.offset_left = -(gap + 8.0)
+	crosshair_left.offset_right = -gap
+	crosshair_right.offset_left = gap
+	crosshair_right.offset_right = gap + 8.0
+
+func _update_vignette() -> void:
+	var player = get_node_or_null("/root/Main/Player")
+	if player == null:
+		return
+	var ratio: float = float(player.current_health) / float(player.max_health)
+	_set_vignette_intensity(clamp(1.0 - ratio, 0.0, 1.0))
+
+func _set_vignette_intensity(intensity: float) -> void:
+	var mat := blood_vignette.material as ShaderMaterial
+	if mat:
+		mat.set_shader_parameter("intensity", intensity)
 
 func _update_powerup_label():
 	var parts: Array[String] = []
@@ -131,9 +190,20 @@ func _on_quit_pressed():
 
 func _on_points_changed(_player_id: int, points: int):
 	points_label.text = "POINTS\n%d" % points
+	var delta_pts: int = points - _last_points
+	_last_points = points
+	if delta_pts > 0:
+		var ft := FloatingTextScene.instantiate() as FloatingText
+		if ft:
+			$Control/FloatingTextAnchor.add_child(ft)
+			ft.position = Vector2(randf_range(-20, 20), 0.0)
+			ft.show_text("+%d" % delta_pts)
 
-func _on_player_damaged(_player_id: int, _damage: int, current_health: int):
-	health_label.text = "HEALTH\n%d" % current_health
+func _on_player_damaged(_player_id: int, _damage: int, current_health: int) -> void:
+	var player = get_node_or_null("/root/Main/Player")
+	var max_hp: int = player.max_health if player else 100
+	var ratio: float = float(current_health) / float(max_hp)
+	_set_vignette_intensity(clamp(1.0 - ratio, 0.0, 1.0))
 	_flash_alpha = FLASH_ALPHA
 
 func _on_ammo_changed(current_ammo: int, total_ammo: int):
@@ -152,6 +222,7 @@ func _on_revive_tick(_player_id: int, time_remaining: float):
 
 func _on_player_revived(_player_id: int, _reviver_id: int):
 	reload_label.visible = false
+	_update_vignette()
 
 func _on_interact_prompt_changed(text: String) -> void:
 	interact_label.text = text
@@ -167,23 +238,39 @@ func _on_headshot_hit(_player_id: int) -> void:
 	_headshot_alpha = 1.0
 	headshot_label.modulate = Color(1.0, 1.0, 0.0, 1.0)
 
+func _on_hit_registered(_player_id: int, is_headshot: bool) -> void:
+	hit_marker.visible = true
+	_hit_alpha = 1.0
+	hit_marker.modulate = Color(1.0, 0.1, 0.1, 1.0) if is_headshot else Color(1.0, 1.0, 1.0, 1.0)
+
 func _on_perk_bought(_perk_name: String) -> void:
 	_update_perks_label()
+	_update_vignette()
+
+func _on_weapon_fired() -> void:
+	_crosshair_spread = minf(_crosshair_spread + 12.0, 40.0)
 
 func _update_perks_label() -> void:
 	var player = get_node_or_null("/root/Main/Player")
 	if player == null:
 		return
-	const PERK_ABBR: Dictionary = {
-		"juggernaut": "JUG", "speed_cola": "SPEED",
-		"quick_revive": "QR", "double_tap": "2TAP", "stamin_up": "STMN"
-	}
-	var parts: Array[String] = []
+	for child in perks_container.get_children():
+		child.queue_free()
 	for perk in player.perks:
-		if PERK_ABBR.has(perk):
-			parts.append(PERK_ABBR[perk])
-	perks_label.text = " | ".join(parts)
-	perks_label.visible = parts.size() > 0
+		var panel := PanelContainer.new()
+		var label := Label.new()
+		label.text = PERK_ABBR.get(perk, "?")
+		label.add_theme_font_size_override("font_size", 13)
+		var style := StyleBoxFlat.new()
+		style.bg_color = PERK_COLORS.get(perk, Color.WHITE)
+		style.corner_radius_top_left = 3
+		style.corner_radius_top_right = 3
+		style.corner_radius_bottom_left = 3
+		style.corner_radius_bottom_right = 3
+		panel.add_theme_stylebox_override("panel", style)
+		panel.add_child(label)
+		perks_container.add_child(panel)
+	perks_container.visible = player.perks.size() > 0
 
 func _connect_weapon(weapon: Node3D) -> void:
 	if _connected_weapon != null and is_instance_valid(_connected_weapon) and _connected_weapon is Weapon:
@@ -192,9 +279,12 @@ func _connect_weapon(weapon: Node3D) -> void:
 			old_w.ammo_changed.disconnect(_on_ammo_changed)
 		if old_w.reloaded.is_connected(_on_reload_started):
 			old_w.reloaded.disconnect(_on_reload_started)
+		if old_w.fired.is_connected(_on_weapon_fired):
+			old_w.fired.disconnect(_on_weapon_fired)
 	_connected_weapon = weapon
 	if weapon is Weapon:
 		var w := weapon as Weapon
 		w.ammo_changed.connect(_on_ammo_changed)
 		w.reloaded.connect(_on_reload_started)
+		w.fired.connect(_on_weapon_fired)
 		_on_ammo_changed(w.current_ammo, w.reserve_ammo)

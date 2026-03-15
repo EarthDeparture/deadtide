@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://b1hud"]
+[gd_scene load_steps=3 format=3 uid="uid://b1hud"]
 
 [ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="1_hud"]
+[ext_resource type="Shader" path="res://shaders/blood_vignette.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_vignette"]
+shader = ExtResource("2_shader")
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -22,6 +26,8 @@ offset_bottom = 50.0
 grow_horizontal = 2
 horizontal_alignment = 1
 text = "ROUND 1"
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 28
 
 [node name="PowerupLabel" type="Label" parent="Control"]
 layout_mode = 1
@@ -35,17 +41,8 @@ grow_horizontal = 2
 horizontal_alignment = 1
 visible = false
 text = ""
-
-[node name="HealthLabel" type="Label" parent="Control"]
-layout_mode = 1
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -60.0
-offset_right = 160.0
-offset_bottom = -16.0
-grow_vertical = 0
-text = "HEALTH\n100"
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 20
 
 [node name="PointsLabel" type="Label" parent="Control"]
 layout_mode = 1
@@ -61,6 +58,8 @@ grow_horizontal = 2
 grow_vertical = 0
 horizontal_alignment = 1
 text = "POINTS\n500"
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 20
 
 [node name="AmmoLabel" type="Label" parent="Control"]
 layout_mode = 1
@@ -76,6 +75,8 @@ grow_horizontal = 0
 grow_vertical = 0
 horizontal_alignment = 2
 text = "8 / 56"
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 24
 
 [node name="ReloadLabel" type="Label" parent="Control"]
 layout_mode = 1
@@ -92,6 +93,8 @@ grow_vertical = 0
 horizontal_alignment = 1
 visible = false
 text = "RELOADING..."
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 20
 
 [node name="InteractLabel" type="Label" parent="Control"]
 layout_mode = 1
@@ -108,6 +111,17 @@ grow_vertical = 0
 horizontal_alignment = 1
 visible = false
 text = ""
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 20
+
+[node name="BloodVignette" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMat_vignette")
 
 [node name="DamageFlash" type="ColorRect" parent="Control"]
 layout_mode = 1
@@ -115,6 +129,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.8, 0, 0, 0)
 
 [node name="RoundBanner" type="Label" parent="Control"]
@@ -133,8 +148,70 @@ horizontal_alignment = 1
 vertical_alignment = 1
 visible = false
 text = "ROUND 1 COMPLETE"
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 20
 
-[node name="Crosshair" type="Label" parent="Control"]
+[node name="CrosshairTop" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -1.0
+offset_top = -14.0
+offset_right = 1.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.9)
+
+[node name="CrosshairBottom" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -1.0
+offset_top = 6.0
+offset_right = 1.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.9)
+
+[node name="CrosshairLeft" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -1.0
+offset_right = -6.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.9)
+
+[node name="CrosshairRight" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 6.0
+offset_top = -1.0
+offset_right = 14.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.9)
+
+[node name="HitMarker" type="Label" parent="Control"]
 layout_mode = 1
 anchor_left = 0.5
 anchor_right = 0.5
@@ -148,7 +225,21 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "+"
+visible = false
+text = "✕"
+
+[node name="FloatingTextAnchor" type="Control" parent="Control"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -30.0
+offset_right = 100.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="GameOverPanel" type="ColorRect" parent="Control"]
 layout_mode = 1
@@ -204,18 +295,20 @@ grow_horizontal = 0
 grow_vertical = 0
 horizontal_alignment = 2
 text = ""
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 18
 
-[node name="PerksLabel" type="Label" parent="Control"]
+[node name="PerksContainer" type="HBoxContainer" parent="Control"]
 layout_mode = 1
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -90.0
-offset_right = 300.0
+offset_top = -95.0
+offset_right = 220.0
 offset_bottom = -65.0
 grow_vertical = 0
 visible = false
-text = ""
+theme_override_constants/separation = 4
 
 [node name="HeadshotLabel" type="Label" parent="Control"]
 layout_mode = 1

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://b1map"]
+[gd_scene load_steps=27 format=3 uid="uid://b1map"]
 
 [ext_resource type="Script" path="res://scripts/maps/PrototypeMap.gd" id="1_map"]
 [ext_resource type="PackedScene" uid="uid://b1wallbuy" path="res://scenes/interactables/WallBuy.tscn" id="2_wb"]
@@ -44,6 +44,12 @@ size = Vector3(20, 4, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_ns2"]
 size = Vector3(20, 4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crate"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_crate"]
+albedo_color = Color(0.35, 0.22, 0.08, 1)
 
 [node name="PrototypeMap" type="Node3D"]
 script = ExtResource("1_map")
@@ -236,10 +242,34 @@ cost = 950
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
-omni_range = 20.0
-light_energy = 1.5
+light_color = Color(1.0, 0.72, 0.32, 1)
+light_energy = 1.8
+omni_range = 22.0
 
 [node name="OmniLight3D2" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 5, 0)
-omni_range = 20.0
-light_energy = 1.5
+light_color = Color(1.0, 0.72, 0.32, 1)
+light_energy = 1.8
+omni_range = 22.0
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Crate1" type="MeshInstance3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.5, 4)
+mesh = SubResource("BoxMesh_crate")
+surface_material_override/0 = SubResource("Mat_crate")
+
+[node name="Crate2" type="MeshInstance3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.5, -4)
+mesh = SubResource("BoxMesh_crate")
+surface_material_override/0 = SubResource("Mat_crate")
+
+[node name="Crate3" type="MeshInstance3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.5, 6)
+mesh = SubResource("BoxMesh_crate")
+surface_material_override/0 = SubResource("Mat_crate")
+
+[node name="Crate4" type="MeshInstance3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0.5, -5)
+mesh = SubResource("BoxMesh_crate")
+surface_material_override/0 = SubResource("Mat_crate")
