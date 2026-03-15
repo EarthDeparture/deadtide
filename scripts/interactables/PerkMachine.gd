@@ -12,3 +12,4 @@ func interact(player: PlayerController) -> void:
 		return
 	if GameManager.spend_player_points(player.player_id, cost):
 		player.buy_perk(perk_name)
+		EventBus.emit_perk_purchased(player.player_id, perk_name, cost)

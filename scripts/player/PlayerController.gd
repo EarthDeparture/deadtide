@@ -22,6 +22,11 @@ var _shake_trauma: float = 0.0
 const SHAKE_DECAY: float = 4.0
 const SHAKE_MAX_OFFSET: float = 0.015
 
+var _melee_cooldown: float = 0.0
+const MELEE_DAMAGE: int = 150
+const MELEE_RANGE: float = 1.5
+const MELEE_COOLDOWN: float = 0.6
+
 var is_downed: bool = false
 var has_quick_revive: bool = false
 var _revive_timer: float = 0.0
@@ -71,6 +76,20 @@ func _physics_process(delta: float):
 
 	if Input.is_action_just_pressed("interact") and nearby_interactable != null:
 		nearby_interactable.interact(self)
+
+	if weapons.size() > 1:
+		if Input.is_action_just_pressed("weapon_1"):
+			equip_weapon(weapons[0])
+		elif Input.is_action_just_pressed("weapon_2") and weapons.size() >= 2:
+			equip_weapon(weapons[1])
+		elif Input.is_action_just_pressed("weapon_next"):
+			_cycle_weapon(1)
+		elif Input.is_action_just_pressed("weapon_prev"):
+			_cycle_weapon(-1)
+
+	_melee_cooldown = maxf(_melee_cooldown - delta, 0.0)
+	if Input.is_action_just_pressed("melee") and _melee_cooldown <= 0.0:
+		_melee_attack()
 
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
@@ -147,6 +166,22 @@ func _revive():
 	GameManager.revive_player(player_id, player_id)
 	damaged.emit(0, current_health)
 
+func _cycle_weapon(direction: int):
+	var idx: int = weapons.find(current_weapon)
+	var next_idx: int = (idx + direction + weapons.size()) % weapons.size()
+	equip_weapon(weapons[next_idx])
+
+func _melee_attack():
+	_melee_cooldown = MELEE_COOLDOWN
+	var space_state := get_world_3d().direct_space_state
+	var from := camera.global_position
+	var to := from + (-camera.global_transform.basis.z * MELEE_RANGE)
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.collision_mask = 1 << 2  # zombie layer
+	var result := space_state.intersect_ray(query)
+	if result and result.collider.has_method("take_damage"):
+		result.collider.take_damage(MELEE_DAMAGE, "knife", player_id)
+
 func add_weapon(weapon: Node3D):
 	weapons.append(weapon)
 	if current_weapon == null:
@@ -157,6 +192,9 @@ func equip_weapon(weapon: Node3D):
 		current_weapon.visible = false
 	current_weapon = weapon
 	current_weapon.visible = true
+	if perks.has("speed_cola") and current_weapon is Weapon:
+		var w := current_weapon as Weapon
+		w.reload_time = w._base_reload_time * 0.5
 	weapon_equipped.emit(weapon)
 
 func _on_interact_area_entered(area: Area3D) -> void:
@@ -182,6 +220,7 @@ func buy_perk(perk_name: String) -> void:
 			damaged.emit(0, current_health)
 		"speed_cola":
 			if current_weapon is Weapon:
-				(current_weapon as Weapon).reload_time *= 0.5
+				var w := current_weapon as Weapon
+				w.reload_time = w._base_reload_time * 0.5
 		"quick_revive":
 			has_quick_revive = true

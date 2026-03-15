@@ -2,6 +2,7 @@ extends Node
 
 signal round_started(round_number: int)
 signal round_ended(round_number: int)
+signal round_countdown(seconds_remaining: int)
 signal player_points_changed(player_id: int, points: int)
 signal game_started()
 signal game_over()
@@ -35,7 +36,9 @@ func end_round():
 	round_in_progress = false
 	round_ended.emit(current_round)
 	current_round += 1
-	await get_tree().create_timer(10.0).timeout
+	for i in range(10, 0, -1):
+		round_countdown.emit(i)
+		await get_tree().create_timer(1.0).timeout
 	start_round()
 
 func add_player(player: Node):

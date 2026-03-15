@@ -17,11 +17,13 @@ var reserve_ammo: int = 0
 var is_reloading: bool = false
 var fire_timer: float = 0.0
 var owner_player: PlayerController = null
+var _base_reload_time: float = -1.0
 
 @onready var shoot_origin: Node3D = $ShootOrigin
 @onready var _muzzle_light: OmniLight3D = get_node_or_null("ShootOrigin/MuzzleLight")
 
 func _ready():
+	_base_reload_time = reload_time
 	current_ammo = mag_size
 	reserve_ammo = max_reserve
 	ammo_changed.emit(current_ammo, reserve_ammo)

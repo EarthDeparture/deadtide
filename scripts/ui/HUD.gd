@@ -21,6 +21,7 @@ var _flash_alpha: float = 0.0
 func _ready():
 	GameManager.round_started.connect(_on_round_started)
 	GameManager.round_ended.connect(_on_round_ended)
+	GameManager.round_countdown.connect(_on_round_countdown)
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.player_points_changed.connect(_on_points_changed)
 	EventBus.player_damaged.connect(_on_player_damaged)
@@ -51,12 +52,15 @@ func _process(delta: float):
 
 func _on_round_started(round_number: int):
 	round_label.text = "ROUND %d" % round_number
+	round_banner.visible = false
 
 func _on_round_ended(round_number: int):
-	round_banner.text = "ROUND %d COMPLETE\nNext round in 10s" % round_number
+	round_banner.text = "ROUND %d COMPLETE" % round_number
 	round_banner.visible = true
-	await get_tree().create_timer(ROUND_BANNER_DURATION).timeout
-	round_banner.visible = false
+
+func _on_round_countdown(seconds_remaining: int):
+	round_banner.text = "NEXT ROUND IN %ds" % seconds_remaining
+	round_banner.visible = true
 
 func _on_game_over():
 	var points: int = 0
