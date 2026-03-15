@@ -24,6 +24,7 @@ var _base_speed: float = WALK_SPEED
 var _round_number: int = 1
 var _mat: StandardMaterial3D = null
 var _head_mat: StandardMaterial3D = null
+var _idle_timer: float = 0.0
 
 @onready var attack_area: Area3D = $AttackArea
 @onready var mesh_instance: MeshInstance3D = $MeshInstance3D
@@ -35,6 +36,7 @@ func _ready():
 	mesh_instance.set_surface_override_material(0, _mat)
 	_head_mat = head_mesh.get_active_material(0).duplicate() as StandardMaterial3D
 	head_mesh.set_surface_override_material(0, _head_mat)
+	_idle_timer = randf_range(3.0, 8.0)
 
 func set_round_difficulty(round_number: int):
 	_round_number = round_number
@@ -57,6 +59,12 @@ func set_target(player: Node3D):
 	target = player
 
 func _physics_process(delta: float):
+	# Idle growl timer runs regardless of target
+	_idle_timer -= delta
+	if _idle_timer <= 0.0:
+		EventBus.emit_zombie_idle()
+		_idle_timer = randf_range(4.0, 9.0)
+
 	if target == null or not is_instance_valid(target):
 		return
 	var target_flat := Vector3(target.global_position.x, global_position.y, target.global_position.z)
@@ -85,6 +93,7 @@ func _attack(player):
 	attack_cooldown_timer = ATTACK_COOLDOWN
 	var damage: int = int(ATTACK_DAMAGE * round_multiplier)
 	player.take_damage(damage)
+	EventBus.zombie_attacked.emit(self, player)
 
 func take_damage(amount: int, damage_type: String, attacker_id: int):
 	health -= amount
@@ -93,6 +102,7 @@ func take_damage(amount: int, damage_type: String, attacker_id: int):
 		die(damage_type, attacker_id)
 	else:
 		hit.emit(self, damage_type, attacker_id)
+		EventBus.emit_zombie_hurt(damage_type)
 
 func _flash_hit() -> void:
 	if _mat == null:
@@ -106,5 +116,6 @@ func _flash_hit() -> void:
 		tween.tween_property(_head_mat, "albedo_color", BASE_HEAD_COLOR, 0.2)
 
 func die(damage_type: String, attacker_id: int):
+	EventBus.emit_zombie_died(damage_type)
 	killed.emit(self, damage_type, attacker_id)
 	queue_free()

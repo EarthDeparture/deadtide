@@ -11,6 +11,7 @@ func interact(player: PlayerController) -> void:
 	if weapon_scenes.is_empty():
 		return
 	if not GameManager.spend_player_points(player.player_id, cost):
+		EventBus.emit_purchase_denied(player.player_id)
 		return
 	var scene: PackedScene = weapon_scenes.pick_random()
 	var new_weapon: Node3D = scene.instantiate() as Node3D
@@ -21,4 +22,5 @@ func interact(player: PlayerController) -> void:
 	player.add_weapon(new_weapon)
 	player.equip_weapon(new_weapon)
 	var wname: String = (new_weapon as Weapon).weapon_name if new_weapon is Weapon else ""
+	EventBus.emit_mystery_box_used(player.player_id)
 	EventBus.emit_weapon_purchased(player.player_id, wname, cost)

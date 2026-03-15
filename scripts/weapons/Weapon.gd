@@ -19,6 +19,7 @@ var fire_timer: float = 0.0
 var owner_player: PlayerController = null
 var _base_reload_time: float = -1.0
 var _base_fire_rate: float = -1.0
+var _dry_fire_timer: float = 0.0
 
 @export var spread: float = 0.03
 @export var recoil_amount: float = 0.03
@@ -37,6 +38,7 @@ func equip(player: PlayerController):
 	owner_player = player
 
 func _process(delta: float):
+	_dry_fire_timer = maxf(_dry_fire_timer - delta, 0.0)
 	fire_timer = maxf(fire_timer - delta, 0.0)
 
 	if is_reloading:
@@ -50,6 +52,9 @@ func _process(delta: float):
 
 func fire():
 	if current_ammo <= 0 or is_reloading:
+		if current_ammo <= 0 and not is_reloading and owner_player != null and _dry_fire_timer <= 0.0:
+			EventBus.emit_weapon_dry_fired(owner_player.player_id)
+			_dry_fire_timer = 0.5
 		return
 
 	fire_timer = fire_rate

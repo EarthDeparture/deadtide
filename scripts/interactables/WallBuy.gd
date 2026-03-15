@@ -15,6 +15,8 @@ func interact(player: PlayerController) -> void:
 		if w is Weapon and (w as Weapon).weapon_name == weapon_name:
 			if GameManager.spend_player_points(player.player_id, ammo_cost):
 				(w as Weapon).add_ammo(ammo_amount)
+			else:
+				EventBus.emit_purchase_denied(player.player_id)
 			return
 	if weapon_scene == null:
 		return
@@ -27,3 +29,5 @@ func interact(player: PlayerController) -> void:
 			(new_weapon as Weapon).equip(player)
 		player.add_weapon(new_weapon)
 		player.equip_weapon(new_weapon)
+	else:
+		EventBus.emit_purchase_denied(player.player_id)
