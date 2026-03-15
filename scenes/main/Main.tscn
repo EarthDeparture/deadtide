@@ -1,33 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://MainScene"]
+[gd_scene load_steps=4 format=3 uid="uid://b1main"]
 
-[ext_resource type="Script" path="res://scripts/main/Main.gd" id="MainScript"]
-
-[sub_resource type="WorldEnvironment" id="WorldEnvironment"]
-
-environment = SubResource("WorldEnvironment")
+[ext_resource type="Script" path="res://scripts/main/Main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://b1map" path="res://scenes/maps/PrototypeMap.tscn" id="2_map"]
+[ext_resource type="PackedScene" uid="uid://b1player" path="res://scenes/core/Player.tscn" id="3_player"]
 
 [node name="Main" type="Node3D"]
-script = ExtResource("MainScript")
+script = ExtResource("1_main")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("WorldEnvironment")
+[node name="PrototypeMap" parent="." instance=ExtResource("2_map")]
 
-[node name="PrototypeMap" type="Node3D" parent="."]
-
-[node name="Floor" type="StaticBody3D" parent="PrototypeMap"]
-transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 10, 0, -0.5, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PrototypeMap/Floor"]
-shape = SubResource("BoxShape3D")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="PrototypeMap/Floor"]
-mesh = SubResource("BoxMesh")
-
-[node name="Player" type="PlayerController" parent="."]
+[node name="Player" parent="." instance=ExtResource("3_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
-shape = SubResource("CapsuleShape3D")
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 10, 0)
+light_energy = 0.8
+shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
