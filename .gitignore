@@ -4,6 +4,8 @@ export/
 *.import
 *.pot
 .translation_cache
+.godot/
+*.uid
 
 # Mono/C#
 .mono/
