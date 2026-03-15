@@ -13,6 +13,9 @@ extends CanvasLayer
 @onready var play_again_button: Button = $Control/GameOverPanel/GameOverContainer/PlayAgainButton
 @onready var quit_button: Button = $Control/GameOverPanel/GameOverContainer/QuitButton
 @onready var powerup_label: Label = $Control/PowerupLabel
+@onready var weapon_label: Label = $Control/WeaponLabel
+@onready var perks_label: Label = $Control/PerksLabel
+@onready var headshot_label: Label = $Control/HeadshotLabel
 
 var _connected_weapon: Node = null
 
@@ -21,6 +24,8 @@ const FLASH_FADE_SPEED: float = 2.0
 const ROUND_BANNER_DURATION: float = 3.0
 
 var _flash_alpha: float = 0.0
+var _headshot_alpha: float = 0.0
+const HEADSHOT_FADE_SPEED: float = 1.5
 
 func _ready():
 	GameManager.round_started.connect(_on_round_started)
@@ -43,9 +48,13 @@ func _ready():
 	if player:
 		player.interact_prompt_changed.connect(_on_interact_prompt_changed)
 		player.weapon_equipped.connect(_on_weapon_equipped)
+		player.perk_bought.connect(_on_perk_bought)
 		if player.current_weapon:
 			_connect_weapon(player.current_weapon)
+			if player.current_weapon is Weapon:
+				weapon_label.text = (player.current_weapon as Weapon).weapon_name
 		health_label.text = "HEALTH\n%d" % player.current_health
+	EventBus.headshot_hit.connect(_on_headshot_hit)
 
 	if GameManager.players.size() > 0:
 		var pid: int = GameManager.players[0].get_instance_id()
@@ -57,6 +66,11 @@ func _process(delta: float):
 		if _flash_alpha < 0.0:
 			_flash_alpha = 0.0
 		damage_flash.color = Color(0.8, 0.0, 0.0, _flash_alpha)
+	if _headshot_alpha > 0.0:
+		_headshot_alpha = maxf(_headshot_alpha - HEADSHOT_FADE_SPEED * delta, 0.0)
+		headshot_label.modulate = Color(1.0, 1.0, 0.0, _headshot_alpha)
+		if _headshot_alpha <= 0.0:
+			headshot_label.visible = false
 	_update_powerup_label()
 
 func _update_powerup_label():
@@ -145,6 +159,31 @@ func _on_interact_prompt_changed(text: String) -> void:
 
 func _on_weapon_equipped(weapon: Node3D) -> void:
 	_connect_weapon(weapon)
+	if weapon is Weapon:
+		weapon_label.text = (weapon as Weapon).weapon_name
+
+func _on_headshot_hit(_player_id: int) -> void:
+	headshot_label.visible = true
+	_headshot_alpha = 1.0
+	headshot_label.modulate = Color(1.0, 1.0, 0.0, 1.0)
+
+func _on_perk_bought(_perk_name: String) -> void:
+	_update_perks_label()
+
+func _update_perks_label() -> void:
+	var player = get_node_or_null("/root/Main/Player")
+	if player == null:
+		return
+	const PERK_ABBR: Dictionary = {
+		"juggernaut": "JUG", "speed_cola": "SPEED",
+		"quick_revive": "QR", "double_tap": "2TAP", "stamin_up": "STMN"
+	}
+	var parts: Array[String] = []
+	for perk in player.perks:
+		if PERK_ABBR.has(perk):
+			parts.append(PERK_ABBR[perk])
+	perks_label.text = " | ".join(parts)
+	perks_label.visible = parts.size() > 0
 
 func _connect_weapon(weapon: Node3D) -> void:
 	if _connected_weapon != null and is_instance_valid(_connected_weapon) and _connected_weapon is Weapon:

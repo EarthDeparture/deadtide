@@ -18,12 +18,17 @@ var is_reloading: bool = false
 var fire_timer: float = 0.0
 var owner_player: PlayerController = null
 var _base_reload_time: float = -1.0
+var _base_fire_rate: float = -1.0
+
+@export var spread: float = 0.03
+@export var recoil_amount: float = 0.03
 
 @onready var shoot_origin: Node3D = $ShootOrigin
 @onready var _muzzle_light: OmniLight3D = get_node_or_null("ShootOrigin/MuzzleLight")
 
 func _ready():
 	_base_reload_time = reload_time
+	_base_fire_rate = fire_rate
 	current_ammo = mag_size
 	reserve_ammo = max_reserve
 	ammo_changed.emit(current_ammo, reserve_ammo)
@@ -53,18 +58,29 @@ func fire():
 
 	var space_state := get_world_3d().direct_space_state
 	var from := shoot_origin.global_position
-	var to := from + (-shoot_origin.global_transform.basis.z * 100.0)
+	var forward := -shoot_origin.global_transform.basis.z
+	var spread_offset := Vector3(
+		randf_range(-spread, spread),
+		randf_range(-spread, spread),
+		0.0
+	)
+	var to := from + (forward + spread_offset) * 100.0
 	var query := PhysicsRayQueryParameters3D.create(from, to)
-	query.collision_mask = 1 << 2  # Zombie layer
+	query.collision_mask = 1 << 2
 
 	var result := space_state.intersect_ray(query)
 	if result and result.collider.has_method("take_damage"):
 		var pid := owner_player.player_id if owner_player != null else 0
 		var actual_damage: int = 99999 if GameManager.insta_kill_active else damage
-		result.collider.take_damage(actual_damage, "body", pid)
+		var damage_type: String = "body"
+		if result.position.y > result.collider.global_position.y + 1.2:
+			damage_type = "headshot"
+			EventBus.emit_headshot_hit(pid)
+		result.collider.take_damage(actual_damage, damage_type, pid)
 
 	if owner_player != null:
 		EventBus.emit_weapon_fired(owner_player.player_id, weapon_name)
+		owner_player.apply_recoil(recoil_amount)
 
 	if _muzzle_light:
 		_muzzle_light.visible = true

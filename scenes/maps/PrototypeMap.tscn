@@ -212,6 +212,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -8)
 perk_name = "quick_revive"
 cost = 1500
 
+[node name="SpeedCola" parent="Interactables" instance=ExtResource("4_perk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 8)
+perk_name = "speed_cola"
+cost = 3000
+
+[node name="DoubleTap" parent="Interactables" instance=ExtResource("4_perk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -8)
+perk_name = "double_tap"
+cost = 2000
+
+[node name="StaminUp" parent="Interactables" instance=ExtResource("4_perk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 8)
+perk_name = "stamin_up"
+cost = 2000
+
 [node name="MysteryBox1" parent="Interactables" instance=ExtResource("7_mbox")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 0)
 weapon_scenes = [ExtResource("5_weapon"), ExtResource("6_smg"), ExtResource("8_rifle")]

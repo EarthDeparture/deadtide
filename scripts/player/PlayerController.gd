@@ -5,10 +5,11 @@ signal damaged(damage: int, health: int)
 signal died()
 signal interact_prompt_changed(text: String)
 signal weapon_equipped(weapon: Node3D)
+signal perk_bought(perk_name: String)
 
 const GRAVITY: float = 9.8
 const WALK_SPEED: float = 5.0
-const SPRINT_SPEED: float = 8.0
+var _sprint_speed: float = 8.0
 const JUMP_VELOCITY: float = 4.5
 
 var current_health: int = 100
@@ -21,6 +22,10 @@ var nearby_interactable: Node = null
 var _shake_trauma: float = 0.0
 const SHAKE_DECAY: float = 4.0
 const SHAKE_MAX_OFFSET: float = 0.015
+
+var _recoil_pitch: float = 0.0
+const RECOIL_RECOVERY: float = 8.0
+const RECOIL_MAX: float = 0.15
 
 var _melee_cooldown: float = 0.0
 const MELEE_DAMAGE: int = 150
@@ -109,7 +114,7 @@ func _physics_process(delta: float):
 
 	input_dir = input_dir.normalized()
 
-	var speed: float = SPRINT_SPEED if Input.is_key_pressed(KEY_SHIFT) else WALK_SPEED
+	var speed: float = _sprint_speed if Input.is_key_pressed(KEY_SHIFT) else WALK_SPEED
 	velocity.x = input_dir.x * speed
 	velocity.z = input_dir.z * speed
 
@@ -122,6 +127,11 @@ func _physics_process(delta: float):
 		)
 	else:
 		camera.position = Vector3.ZERO
+
+	if _recoil_pitch > 0.0:
+		var recover: float = minf(_recoil_pitch, RECOIL_RECOVERY * delta)
+		_recoil_pitch -= recover
+		head.rotation.x = clamp(head.rotation.x + recover, -PI / 2, PI / 2)
 
 	move_and_slide()
 
@@ -193,9 +203,12 @@ func equip_weapon(weapon: Node3D):
 		current_weapon.visible = false
 	current_weapon = weapon
 	current_weapon.visible = true
-	if perks.has("speed_cola") and current_weapon is Weapon:
+	if current_weapon is Weapon:
 		var w := current_weapon as Weapon
-		w.reload_time = w._base_reload_time * 0.5
+		if perks.has("speed_cola"):
+			w.reload_time = w._base_reload_time * 0.5
+		if perks.has("double_tap"):
+			w.fire_rate = w._base_fire_rate * 0.5
 	weapon_equipped.emit(weapon)
 
 func _on_interact_area_entered(area: Area3D) -> void:
@@ -215,6 +228,11 @@ func refill_all_ammo() -> void:
 		if w is Weapon:
 			(w as Weapon).refill_ammo()
 
+func apply_recoil(amount: float) -> void:
+	var kick: float = minf(amount, RECOIL_MAX - _recoil_pitch)
+	_recoil_pitch += kick
+	head.rotation.x = clamp(head.rotation.x - kick, -PI / 2, PI / 2)
+
 func buy_perk(perk_name: String) -> void:
 	if perks.has(perk_name):
 		return
@@ -230,3 +248,10 @@ func buy_perk(perk_name: String) -> void:
 				w.reload_time = w._base_reload_time * 0.5
 		"quick_revive":
 			has_quick_revive = true
+		"double_tap":
+			if current_weapon is Weapon:
+				var w := current_weapon as Weapon
+				w.fire_rate = w._base_fire_rate * 0.5
+		"stamin_up":
+			_sprint_speed = 8.0 * 1.3
+	perk_bought.emit(perk_name)
