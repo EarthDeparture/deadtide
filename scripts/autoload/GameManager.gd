@@ -39,7 +39,7 @@ func end_round():
 	start_round()
 
 func add_player(player: Node):
-	var player_id := player.get_instance_id()
+	var player_id: int = player.get_instance_id()
 	players.append(player)
 	player_data[player_id] = {
 		"points": 500,
@@ -78,9 +78,9 @@ func revive_player(player_id: int, reviver_id: int):
 		EventBus.player_revived.emit(player_id, reviver_id)
 
 func check_game_over():
-	var all_downed := true
+	var all_downed: bool = true
 	for player in players:
-		var pid := player.get_instance_id()
+		var pid: int = (player as Node).get_instance_id()
 		if player_data.has(pid) and not player_data[pid]["is_downed"]:
 			all_downed = false
 			break
