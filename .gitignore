@@ -1,0 +1,21 @@
+# Godot-specific
+.import/
+export/
+*.import
+*.pot
+.translation_cache
+
+# Mono/C#
+.mono/
+*.sln
+*.csproj
+
+# macOS
+.DS_Store
+
+# Backup files
+*~
+
+# User-specific
+*.tmp
+*.bak

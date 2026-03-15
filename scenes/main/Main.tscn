@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://MainScene"]
+
+[ext_resource type="Script" path="res://scripts/main/Main.gd" id="MainScript"]
+
+[sub_resource type="WorldEnvironment" id="WorldEnvironment"]
+
+environment = SubResource("WorldEnvironment")
+
+[node name="Main" type="Node3D"]
+script = ExtResource("MainScript")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("WorldEnvironment")
+
+[node name="PrototypeMap" type="Node3D" parent="."]
+
+[node name="Floor" type="StaticBody3D" parent="PrototypeMap"]
+transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 10, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PrototypeMap/Floor"]
+shape = SubResource("BoxShape3D")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="PrototypeMap/Floor"]
+mesh = SubResource("BoxMesh")
+
+[node name="Player" type="PlayerController" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)

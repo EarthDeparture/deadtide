@@ -1,0 +1,82 @@
+extends CharacterBody3D
+
+signal killed(zombie: Node, damage_type: String, player_id: int)
+
+const WALK_SPEED = 2.0
+const RUN_SPEED = 4.0
+const ATTACK_DAMAGE = 25
+const ATTACK_COOLDOWN = 1.5
+
+var health: int = 100
+var max_health: int = 100
+var target: Node = null
+var is_attacking: bool = false
+var attack_cooldown_timer: float = 0.0
+var round_multiplier: float = 1.0
+
+@onready var attack_area = $AttackArea
+@onready var collision_shape = $CollisionShape3D
+@onready var attack_collision = $AttackArea/AttackCollision
+
+func _ready():
+    attack_area.body_entered.connect(_on_player_in_range)
+
+func set_round_difficulty(round_number: int):
+    # Zombies get stronger each round
+    round_multiplier = 1.0 + (round_number * 0.1)
+    health = max_health * round_multiplier
+    health = int(health)
+
+func set_target(player: Node):
+    target = player
+
+func _physics_process(delta):
+    if not target or not is_instance_valid(target):
+        return
+
+    # Look at target
+    look_at(target.global_position, Vector3.UP)
+    rotation.x = 0
+    rotation.z = 0
+
+    # Move towards target
+    var direction = (target.global_position - global_position).normalized()
+    var speed = RUN_SPEED * round_multiplier
+    velocity.x = direction.x * speed
+    velocity.z = direction.z * speed
+
+    # Simple gravity
+    if not is_on_floor():
+        velocity.y -= 9.8 * delta
+
+    move_and_slide()
+
+    # Attack cooldown
+    if is_attacking:
+        attack_cooldown_timer -= delta
+        if attack_cooldown_timer <= 0:
+            is_attacking = false
+
+func _on_player_in_range(body: Node):
+    if body is PlayerController and not is_attacking:
+        attack(body)
+
+func attack(player: PlayerController):
+    if is_attacking:
+        return
+
+    is_attacking = true
+    attack_cooldown_timer = ATTACK_COOLDOWN
+
+    var damage = int(ATTACK_DAMAGE * round_multiplier)
+    player.take_damage(damage)
+
+func take_damage(damage: int, damage_type: String, attacker_id: int):
+    health -= damage
+
+    if health <= 0:
+        die(damage_type, attacker_id)
+
+func die(damage_type: String, attacker_id: int):
+    killed.emit(self, damage_type, attacker_id)
+    queue_free()

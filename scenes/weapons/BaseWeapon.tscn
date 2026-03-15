@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://BaseWeapon"]
+
+[ext_resource type="Script" path="res://scripts/weapons/Weapon.gd" id="WeaponScript"]
+
+[node name="BaseWeapon" type="Node3D"]
+script = ExtResource("WeaponScript")
+
+[node name="ShootOrigin" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
