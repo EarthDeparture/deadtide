@@ -37,8 +37,9 @@ func _input(event: InputEvent):
 		return
 
 	if event is InputEventMouseMotion:
-		rotate_y(-event.relative.x * sensitivity)
-		head.rotate_x(-event.relative.y * sensitivity)
+		var mouse_event := event as InputEventMouseMotion
+		rotate_y(-mouse_event.relative.x * sensitivity)
+		head.rotate_x(-mouse_event.relative.y * sensitivity)
 		head.rotation.x = clamp(head.rotation.x, -PI / 2, PI / 2)
 
 func _physics_process(delta: float):
