@@ -20,8 +20,8 @@ func register_spawn_point(spawn_point: Node3D):
 	spawn_points.append(spawn_point)
 
 func spawn_wave(round_number: int):
-	var zombie_count := 6 + (4 * round_number)
-	print("Spawning wave of ", zombie_count, " zombies for round ", round_number)
+	var zombie_count: int = 6 + (4 * round_number)
+	print("Spawning ", zombie_count, " zombies for round ", round_number)
 	for i in range(zombie_count):
 		_spawn_zombie()
 		await get_tree().create_timer(0.5).timeout
@@ -39,7 +39,7 @@ func _spawn_zombie():
 	zombie_spawned.emit(zombie)
 
 func _on_zombie_killed(zombie: Node, damage_type: String, player_id: int):
-	var points := KILL_POINTS
+	var points: int = KILL_POINTS
 	if damage_type == "headshot":
 		points = HEADSHOT_POINTS
 	elif damage_type == "knife":
@@ -48,7 +48,7 @@ func _on_zombie_killed(zombie: Node, damage_type: String, player_id: int):
 	GameManager.add_player_points(player_id, points)
 	active_zombies.erase(zombie)
 	if active_zombies.is_empty() and GameManager.round_in_progress:
-		print("All zombies dead — ending round")
+		print("All zombies dead - ending round")
 		all_zombies_dead.emit()
 		GameManager.end_round()
 
