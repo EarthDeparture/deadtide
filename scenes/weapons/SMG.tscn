@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://b1smg"]
+
+[ext_resource type="Script" path="res://scripts/weapons/Weapon.gd" id="1_weapon"]
+
+[node name="SMG" type="Node3D"]
+script = ExtResource("1_weapon")
+weapon_name = "Thompson SMG"
+damage = 15
+fire_rate = 0.08
+reload_time = 2.5
+mag_size = 30
+max_reserve = 120
+
+[node name="ShootOrigin" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)

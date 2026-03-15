@@ -33,6 +33,7 @@ func _ready():
 		player.weapon_equipped.connect(_on_weapon_equipped)
 		if player.current_weapon:
 			_connect_weapon(player.current_weapon)
+		health_label.text = "HEALTH\n%d" % player.current_health
 
 	if GameManager.players.size() > 0:
 		var pid: int = GameManager.players[0].get_instance_id()

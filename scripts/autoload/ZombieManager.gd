@@ -7,6 +7,7 @@ signal all_zombies_dead()
 const KILL_POINTS = 100
 const HEADSHOT_POINTS = 100
 const KNIFE_POINTS = 130
+const HIT_POINTS: int = 10
 
 var active_zombies: Array[Node] = []
 var zombie_scene: PackedScene
@@ -42,7 +43,11 @@ func _spawn_zombie():
 		zombie.set_target(GameManager.players[0] as Node3D)
 	active_zombies.append(zombie)
 	zombie.killed.connect(_on_zombie_killed)
+	zombie.hit.connect(_on_zombie_hit)
 	zombie_spawned.emit(zombie)
+
+func _on_zombie_hit(_zombie: Node, _damage_type: String, player_id: int) -> void:
+	GameManager.add_player_points(player_id, HIT_POINTS)
 
 func _on_zombie_killed(zombie: Node, damage_type: String, player_id: int):
 	var points: int = KILL_POINTS

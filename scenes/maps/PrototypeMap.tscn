@@ -1,10 +1,11 @@
-[gd_scene load_steps=22 format=3 uid="uid://b1map"]
+[gd_scene load_steps=23 format=3 uid="uid://b1map"]
 
 [ext_resource type="Script" path="res://scripts/maps/PrototypeMap.gd" id="1_map"]
 [ext_resource type="PackedScene" uid="uid://b1wallbuy" path="res://scenes/interactables/WallBuy.tscn" id="2_wb"]
 [ext_resource type="PackedScene" uid="uid://b1door" path="res://scenes/interactables/Door.tscn" id="3_door"]
 [ext_resource type="PackedScene" uid="uid://b1perk" path="res://scenes/interactables/PerkMachine.tscn" id="4_perk"]
 [ext_resource type="PackedScene" uid="uid://b1weapon" path="res://scenes/weapons/BaseWeapon.tscn" id="5_weapon"]
+[ext_resource type="PackedScene" uid="uid://b1smg" path="res://scenes/weapons/SMG.tscn" id="6_smg"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(20, 1, 20)
@@ -188,8 +189,8 @@ ammo_amount = 30
 
 [node name="WallBuy2" parent="Interactables" instance=ExtResource("2_wb")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -10.0, 0, 5)
-weapon_scene = ExtResource("5_weapon")
-weapon_name = "Thompson"
+weapon_scene = ExtResource("6_smg")
+weapon_name = "Thompson SMG"
 weapon_cost = 1500
 ammo_cost = 500
 ammo_amount = 40
