@@ -9,6 +9,9 @@ extends CanvasLayer
 @onready var damage_flash: ColorRect = $Control/DamageFlash
 @onready var round_banner: Label = $Control/RoundBanner
 @onready var game_over_panel: ColorRect = $Control/GameOverPanel
+@onready var game_over_label: Label = $Control/GameOverPanel/GameOverContainer/GameOverLabel
+@onready var play_again_button: Button = $Control/GameOverPanel/GameOverContainer/PlayAgainButton
+@onready var quit_button: Button = $Control/GameOverPanel/GameOverContainer/QuitButton
 
 var _connected_weapon: Node = null
 
@@ -23,6 +26,8 @@ func _ready():
 	GameManager.round_ended.connect(_on_round_ended)
 	GameManager.round_countdown.connect(_on_round_countdown)
 	GameManager.game_over.connect(_on_game_over)
+	play_again_button.pressed.connect(_on_play_again_pressed)
+	quit_button.pressed.connect(_on_quit_pressed)
 	GameManager.player_points_changed.connect(_on_points_changed)
 	EventBus.player_damaged.connect(_on_player_damaged)
 	EventBus.player_downed.connect(_on_player_downed)
@@ -67,10 +72,16 @@ func _on_game_over():
 	if GameManager.players.size() > 0:
 		var pid: int = GameManager.players[0].get_instance_id()
 		points = GameManager.get_player_points(pid)
-	var label := game_over_panel.get_node("GameOverLabel") as Label
-	label.text = "GAME OVER\nRound %d\n%d pts" % [GameManager.current_round, points]
+	game_over_label.text = "GAME OVER\nRound %d\n%d pts" % [GameManager.current_round, points]
 	game_over_panel.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func _on_play_again_pressed():
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	get_tree().reload_current_scene()
+
+func _on_quit_pressed():
+	get_tree().quit()
 
 func _on_points_changed(_player_id: int, points: int):
 	points_label.text = "POINTS\n%d" % points
