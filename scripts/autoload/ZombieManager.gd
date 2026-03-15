@@ -8,14 +8,17 @@ const KILL_POINTS = 100
 const HEADSHOT_POINTS = 100
 const KNIFE_POINTS = 130
 const HIT_POINTS: int = 10
+const POWERUP_DROP_CHANCE: float = 0.1
 
 var active_zombies: Array[Node] = []
 var zombie_scene: PackedScene
+var _powerup_scene: PackedScene
 var spawn_points: Array[Node3D] = []
 
 func _ready():
 	print("ZombieManager initialized")
 	zombie_scene = preload("res://scenes/enemies/Zombie.tscn")
+	_powerup_scene = preload("res://scenes/powerups/PowerUp.tscn")
 
 func register_spawn_point(spawn_point: Node3D):
 	spawn_points.append(spawn_point)
@@ -55,11 +58,35 @@ func _on_zombie_killed(zombie: Node, damage_type: String, player_id: int):
 		points = HEADSHOT_POINTS
 	elif damage_type == "knife":
 		points = KNIFE_POINTS
+	if GameManager.double_points_active:
+		points *= 2
 	zombie_killed.emit(zombie, player_id, points)
 	GameManager.add_player_points(player_id, points)
+	if randf() < POWERUP_DROP_CHANCE:
+		var zombie_3d := zombie as Node3D
+		if zombie_3d != null:
+			_spawn_powerup(zombie_3d.global_position)
 	active_zombies.erase(zombie)
 	if active_zombies.is_empty() and GameManager.round_in_progress:
 		print("All zombies dead - ending round")
+		all_zombies_dead.emit()
+		GameManager.end_round()
+
+func _spawn_powerup(pos: Vector3):
+	var types: Array = ["max_ammo", "nuke", "double_points", "insta_kill"]
+	var powerup: Node3D = _powerup_scene.instantiate() as Node3D
+	powerup.powerup_type = types[randi() % types.size()]
+	powerup.position = pos + Vector3(0, 0.5, 0)
+	get_tree().current_scene.add_child(powerup)
+
+func nuke_all():
+	if active_zombies.is_empty():
+		return
+	for zombie in active_zombies:
+		if is_instance_valid(zombie):
+			zombie.queue_free()
+	active_zombies.clear()
+	if GameManager.round_in_progress:
 		all_zombies_dead.emit()
 		GameManager.end_round()
 

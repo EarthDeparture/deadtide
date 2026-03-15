@@ -180,7 +180,8 @@ func _melee_attack():
 	query.collision_mask = 1 << 2  # zombie layer
 	var result := space_state.intersect_ray(query)
 	if result and result.collider.has_method("take_damage"):
-		result.collider.take_damage(MELEE_DAMAGE, "knife", player_id)
+		var actual_damage: int = 99999 if GameManager.insta_kill_active else MELEE_DAMAGE
+		result.collider.take_damage(actual_damage, "knife", player_id)
 
 func add_weapon(weapon: Node3D):
 	weapons.append(weapon)
@@ -208,6 +209,11 @@ func _on_interact_area_exited(area: Area3D) -> void:
 	if parent == nearby_interactable:
 		nearby_interactable = null
 		interact_prompt_changed.emit("")
+
+func refill_all_ammo() -> void:
+	for w in weapons:
+		if w is Weapon:
+			(w as Weapon).refill_ammo()
 
 func buy_perk(perk_name: String) -> void:
 	if perks.has(perk_name):

@@ -60,7 +60,8 @@ func fire():
 	var result := space_state.intersect_ray(query)
 	if result and result.collider.has_method("take_damage"):
 		var pid := owner_player.player_id if owner_player != null else 0
-		result.collider.take_damage(damage, "body", pid)
+		var actual_damage: int = 99999 if GameManager.insta_kill_active else damage
+		result.collider.take_damage(actual_damage, "body", pid)
 
 	if owner_player != null:
 		EventBus.emit_weapon_fired(owner_player.player_id, weapon_name)
@@ -90,4 +91,9 @@ func reload():
 
 func add_ammo(amount: int):
 	reserve_ammo += amount
+	ammo_changed.emit(current_ammo, reserve_ammo)
+
+func refill_ammo():
+	current_ammo = mag_size
+	reserve_ammo = max_reserve
 	ammo_changed.emit(current_ammo, reserve_ammo)

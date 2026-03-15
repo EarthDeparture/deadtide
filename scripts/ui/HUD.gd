@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var game_over_label: Label = $Control/GameOverPanel/GameOverContainer/GameOverLabel
 @onready var play_again_button: Button = $Control/GameOverPanel/GameOverContainer/PlayAgainButton
 @onready var quit_button: Button = $Control/GameOverPanel/GameOverContainer/QuitButton
+@onready var powerup_label: Label = $Control/PowerupLabel
 
 var _connected_weapon: Node = null
 
@@ -26,6 +27,8 @@ func _ready():
 	GameManager.round_ended.connect(_on_round_ended)
 	GameManager.round_countdown.connect(_on_round_countdown)
 	GameManager.game_over.connect(_on_game_over)
+	GameManager.powerup_activated.connect(_on_powerup_activated)
+	GameManager.powerup_expired.connect(_on_powerup_expired)
 	play_again_button.pressed.connect(_on_play_again_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	GameManager.player_points_changed.connect(_on_points_changed)
@@ -54,6 +57,19 @@ func _process(delta: float):
 		if _flash_alpha < 0.0:
 			_flash_alpha = 0.0
 		damage_flash.color = Color(0.8, 0.0, 0.0, _flash_alpha)
+	_update_powerup_label()
+
+func _update_powerup_label():
+	var parts: Array[String] = []
+	if GameManager.double_points_active:
+		parts.append("2X POINTS %ds" % ceili(GameManager.double_points_timer))
+	if GameManager.insta_kill_active:
+		parts.append("INSTA KILL %ds" % ceili(GameManager.insta_kill_timer))
+	if parts.is_empty():
+		powerup_label.visible = false
+	else:
+		powerup_label.text = "  ".join(parts)
+		powerup_label.visible = true
 
 func _on_round_started(round_number: int):
 	round_label.text = "ROUND %d" % round_number
@@ -75,6 +91,22 @@ func _on_game_over():
 	game_over_label.text = "GAME OVER\nRound %d\n%d pts" % [GameManager.current_round, points]
 	game_over_panel.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func _on_powerup_activated(type: String, _duration: float):
+	match type:
+		"max_ammo":
+			powerup_label.text = "MAX AMMO!"
+			powerup_label.visible = true
+			await get_tree().create_timer(2.0).timeout
+			_update_powerup_label()
+		"nuke":
+			powerup_label.text = "NUKE!"
+			powerup_label.visible = true
+			await get_tree().create_timer(2.0).timeout
+			_update_powerup_label()
+
+func _on_powerup_expired(_type: String):
+	_update_powerup_label()
 
 func _on_play_again_pressed():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

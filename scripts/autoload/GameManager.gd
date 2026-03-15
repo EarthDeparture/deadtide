@@ -6,6 +6,8 @@ signal round_countdown(seconds_remaining: int)
 signal player_points_changed(player_id: int, points: int)
 signal game_started()
 signal game_over()
+signal powerup_activated(type: String, duration: float)
+signal powerup_expired(type: String)
 
 var current_round: int = 1
 var players: Array[Node] = []
@@ -13,12 +15,56 @@ var game_active: bool = false
 var round_in_progress: bool = false
 var player_data: Dictionary = {}
 
+var double_points_active: bool = false
+var insta_kill_active: bool = false
+var double_points_timer: float = 0.0
+var insta_kill_timer: float = 0.0
+
+const POWERUP_DURATION: float = 30.0
+
 func _ready():
 	print("GameManager initialized")
+
+func _process(delta: float):
+	if double_points_active:
+		double_points_timer -= delta
+		if double_points_timer <= 0.0:
+			double_points_active = false
+			powerup_expired.emit("double_points")
+	if insta_kill_active:
+		insta_kill_timer -= delta
+		if insta_kill_timer <= 0.0:
+			insta_kill_active = false
+			powerup_expired.emit("insta_kill")
+
+func activate_powerup(type: String):
+	match type:
+		"max_ammo":
+			for player in players:
+				if player.has_method("refill_all_ammo"):
+					player.refill_all_ammo()
+			powerup_activated.emit("max_ammo", 0.0)
+		"nuke":
+			for player in players:
+				add_player_points(player.get_instance_id(), 400)
+			ZombieManager.nuke_all()
+			powerup_activated.emit("nuke", 0.0)
+		"double_points":
+			double_points_active = true
+			double_points_timer = POWERUP_DURATION
+			powerup_activated.emit("double_points", POWERUP_DURATION)
+		"insta_kill":
+			insta_kill_active = true
+			insta_kill_timer = POWERUP_DURATION
+			powerup_activated.emit("insta_kill", POWERUP_DURATION)
 
 func start_game():
 	game_active = true
 	current_round = 1
+	double_points_active = false
+	insta_kill_active = false
+	double_points_timer = 0.0
+	insta_kill_timer = 0.0
 	game_started.emit()
 	start_round()
 
