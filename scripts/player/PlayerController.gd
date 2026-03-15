@@ -18,6 +18,15 @@ var is_dead: bool = false
 var perks: Array[String] = []
 var nearby_interactable: Node = null
 
+var _shake_trauma: float = 0.0
+const SHAKE_DECAY: float = 4.0
+const SHAKE_MAX_OFFSET: float = 0.015
+
+var is_downed: bool = false
+var has_quick_revive: bool = false
+var _revive_timer: float = 0.0
+const REVIVE_TIME: float = 5.0
+
 @export var sensitivity: float = 0.003
 
 var current_weapon: Node3D = null
@@ -53,6 +62,13 @@ func _input(event: InputEvent):
 		head.rotation.x = clamp(head.rotation.x, -PI / 2, PI / 2)
 
 func _physics_process(delta: float):
+	if is_downed:
+		_revive_timer -= delta
+		EventBus.player_revive_tick.emit(player_id, _revive_timer)
+		if _revive_timer <= 0.0:
+			_revive()
+		return
+
 	if Input.is_action_just_pressed("interact") and nearby_interactable != null:
 		nearby_interactable.interact(self)
 
@@ -78,10 +94,21 @@ func _physics_process(delta: float):
 	velocity.x = input_dir.x * speed
 	velocity.z = input_dir.z * speed
 
+	if _shake_trauma > 0.0:
+		_shake_trauma = move_toward(_shake_trauma, 0.0, SHAKE_DECAY * delta)
+		camera.position = Vector3(
+			randf_range(-_shake_trauma, _shake_trauma) * SHAKE_MAX_OFFSET,
+			randf_range(-_shake_trauma, _shake_trauma) * SHAKE_MAX_OFFSET,
+			0.0
+		)
+	else:
+		camera.position = Vector3.ZERO
+
 	move_and_slide()
 
 func take_damage(amount: int):
 	current_health -= amount
+	_shake_trauma = minf(_shake_trauma + 0.4, 1.0)
 	EventBus.emit_player_damaged(player_id, amount, current_health)
 	damaged.emit(amount, current_health)
 	if current_health <= 0:
@@ -91,7 +118,10 @@ func heal(amount: int):
 	current_health = mini(current_health + amount, max_health)
 
 func die():
-	if is_dead:
+	if is_dead or is_downed:
+		return
+	if has_quick_revive:
+		_enter_downed()
 		return
 	is_dead = true
 	died.emit()
@@ -99,6 +129,23 @@ func die():
 	set_process(false)
 	set_physics_process(false)
 	set_process_input(false)
+
+func _enter_downed():
+	is_downed = true
+	has_quick_revive = false
+	_revive_timer = REVIVE_TIME
+	current_health = 1
+	EventBus.emit_player_downed(player_id)
+	if current_weapon:
+		current_weapon.set_process(false)
+
+func _revive():
+	is_downed = false
+	current_health = 50
+	if current_weapon:
+		current_weapon.set_process(true)
+	GameManager.revive_player(player_id, player_id)
+	damaged.emit(0, current_health)
 
 func add_weapon(weapon: Node3D):
 	weapons.append(weapon)
@@ -137,4 +184,4 @@ func buy_perk(perk_name: String) -> void:
 			if current_weapon is Weapon:
 				(current_weapon as Weapon).reload_time *= 0.5
 		"quick_revive":
-			pass
+			has_quick_revive = true

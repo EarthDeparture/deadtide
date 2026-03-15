@@ -19,6 +19,7 @@ var fire_timer: float = 0.0
 var owner_player: PlayerController = null
 
 @onready var shoot_origin: Node3D = $ShootOrigin
+@onready var _muzzle_light: OmniLight3D = get_node_or_null("ShootOrigin/MuzzleLight")
 
 func _ready():
 	current_ammo = mag_size
@@ -61,6 +62,12 @@ func fire():
 
 	if owner_player != null:
 		EventBus.emit_weapon_fired(owner_player.player_id, weapon_name)
+
+	if _muzzle_light:
+		_muzzle_light.visible = true
+		await get_tree().process_frame
+		if is_instance_valid(_muzzle_light):
+			_muzzle_light.visible = false
 
 	ammo_changed.emit(current_ammo, reserve_ammo)
 

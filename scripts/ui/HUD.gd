@@ -24,6 +24,9 @@ func _ready():
 	GameManager.game_over.connect(_on_game_over)
 	GameManager.player_points_changed.connect(_on_points_changed)
 	EventBus.player_damaged.connect(_on_player_damaged)
+	EventBus.player_downed.connect(_on_player_downed)
+	EventBus.player_revive_tick.connect(_on_revive_tick)
+	EventBus.player_revived.connect(_on_player_revived)
 
 	round_label.text = "ROUND %d" % GameManager.current_round
 
@@ -56,6 +59,12 @@ func _on_round_ended(round_number: int):
 	round_banner.visible = false
 
 func _on_game_over():
+	var points: int = 0
+	if GameManager.players.size() > 0:
+		var pid: int = GameManager.players[0].get_instance_id()
+		points = GameManager.get_player_points(pid)
+	var label := game_over_panel.get_node("GameOverLabel") as Label
+	label.text = "GAME OVER\nRound %d\n%d pts" % [GameManager.current_round, points]
 	game_over_panel.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
@@ -72,6 +81,16 @@ func _on_ammo_changed(current_ammo: int, total_ammo: int):
 
 func _on_reload_started():
 	reload_label.visible = true
+
+func _on_player_downed(_player_id: int):
+	reload_label.text = "DOWNED - REVIVING..."
+	reload_label.visible = true
+
+func _on_revive_tick(_player_id: int, time_remaining: float):
+	reload_label.text = "REVIVING IN %.1fs" % time_remaining
+
+func _on_player_revived(_player_id: int, _reviver_id: int):
+	reload_label.visible = false
 
 func _on_interact_prompt_changed(text: String) -> void:
 	interact_label.text = text

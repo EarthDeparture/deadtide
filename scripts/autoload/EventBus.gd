@@ -5,6 +5,7 @@ signal player_damaged(player_id: int, damage: int, current_health: int)
 signal player_healed(player_id: int, heal_amount: int, current_health: int)
 signal player_downed(player_id: int)
 signal player_revived(player_id: int, reviver_id: int)
+signal player_revive_tick(player_id: int, time_remaining: float)
 
 # Weapon events
 signal weapon_fired(player_id: int, weapon_name: String)
