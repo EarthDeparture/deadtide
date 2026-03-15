@@ -4,8 +4,10 @@ extends CharacterBody3D
 signal killed(zombie: Node, damage_type: String, player_id: int)
 signal hit(zombie: Node, damage_type: String, attacker_id: int)
 
-const RUN_SPEED: float = 4.0
-const MAX_SPEED: float = 7.0
+const WALK_SPEED: float = 1.4
+const RUN_SPEED: float = 2.8
+const SPRINT_SPEED: float = 4.5
+const PROXIMITY_SPRINT_RANGE: float = 4.0
 const ATTACK_DAMAGE: int = 25
 const ATTACK_COOLDOWN: float = 1.5
 const BASE_COLOR := Color(0.15, 0.45, 0.1, 1)
@@ -17,6 +19,8 @@ var target: Node3D = null
 var is_attacking: bool = false
 var attack_cooldown_timer: float = 0.0
 var round_multiplier: float = 1.0
+var _base_speed: float = WALK_SPEED
+var _round_number: int = 1
 var _mat: StandardMaterial3D = null
 
 @onready var attack_area: Area3D = $AttackArea
@@ -28,9 +32,21 @@ func _ready():
 	mesh_instance.set_surface_override_material(0, _mat)
 
 func set_round_difficulty(round_number: int):
+	_round_number = round_number
 	round_multiplier = 1.0 + (round_number * 0.1)
 	health = int(max_health * round_multiplier)
 	max_health = health
+
+	if round_number >= 13:
+		_base_speed = SPRINT_SPEED
+	elif round_number >= 7:
+		_base_speed = RUN_SPEED
+	elif round_number == 6:
+		_base_speed = (WALK_SPEED + RUN_SPEED) * 0.5
+	else:
+		_base_speed = WALK_SPEED
+
+	_base_speed *= randf_range(0.9, 1.1)
 
 func set_target(player: Node3D):
 	target = player
@@ -41,7 +57,10 @@ func _physics_process(delta: float):
 	var target_flat := Vector3(target.global_position.x, global_position.y, target.global_position.z)
 	look_at(target_flat, Vector3.UP)
 	var direction: Vector3 = (target.global_position - global_position).normalized()
-	var speed: float = minf(RUN_SPEED * round_multiplier, MAX_SPEED)
+	var speed: float = _base_speed
+	if _round_number >= 10 and target != null:
+		if global_position.distance_to(target.global_position) < PROXIMITY_SPRINT_RANGE:
+			speed = SPRINT_SPEED
 	velocity.x = direction.x * speed
 	velocity.z = direction.z * speed
 	if not is_on_floor():
