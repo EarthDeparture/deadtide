@@ -360,7 +360,7 @@ cost = 2000
 
 [node name="MysteryBox1" parent="Interactables" instance=ExtResource("7_mbox")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 0)
-weapon_scenes = [ExtResource("5_weapon"), ExtResource("6_smg"), ExtResource("8_rifle")]
+weapon_scenes = [ExtResource("6_smg"), ExtResource("8_rifle")]
 cost = 950
 
 [node name="Doors" type="Node3D" parent="."]

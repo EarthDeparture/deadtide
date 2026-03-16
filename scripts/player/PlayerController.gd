@@ -220,6 +220,8 @@ func add_or_replace_secondary(new_weapon: Node3D) -> void:
 	else:
 		var old: Node3D = weapons[1]
 		weapons[1] = new_weapon
+		if current_weapon == old:
+			current_weapon = null
 		if is_instance_valid(old):
 			old.queue_free()
 	equip_weapon(new_weapon)
