@@ -45,6 +45,7 @@ func _repair_one_board(player: PlayerController) -> void:
 			_update_board_visuals()
 			GameManager.add_player_points(player.player_id, BOARD_REPAIR_POINTS)
 			EventBus.emit_window_repaired(_window_id, BOARD_REPAIR_POINTS)
+			player.interact_prompt_changed.emit(get_prompt())
 			return
 
 func _on_repair_body_entered(body: Node) -> void:
@@ -89,6 +90,10 @@ func get_exterior_spawn_position() -> Vector3:
 	if marker != null:
 		return marker.global_position
 	return global_position
+
+func get_interior_entry_position() -> Vector3:
+	# global_transform.basis.z points toward the interior for both north and south windows
+	return global_position + global_transform.basis.z * 1.5 + Vector3(0, 0.1, 0)
 
 func _update_board_visuals() -> void:
 	var boards_node := get_node_or_null("Boards")

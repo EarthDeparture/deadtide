@@ -210,6 +210,17 @@ func add_weapon(weapon: Node3D):
 	if current_weapon == null:
 		equip_weapon(weapon)
 
+func replace_weapon(old: Node3D, replacement: Node3D) -> void:
+	var idx: int = weapons.find(old)
+	if idx >= 0:
+		weapons[idx] = replacement
+	else:
+		weapons.append(replacement)
+	current_weapon = null
+	equip_weapon(replacement)
+	if old != null and is_instance_valid(old):
+		old.queue_free()
+
 func equip_weapon(weapon: Node3D):
 	if current_weapon != null:
 		current_weapon.visible = false

@@ -30,6 +30,7 @@ signal zombie_hurt(damage_type: String)
 signal zombie_died(damage_type: String)
 signal zombie_idle()
 signal window_repaired(window_id: String, points_awarded: int)
+signal board_broken()
 
 # Game events
 signal game_won(score: int)
@@ -88,3 +89,6 @@ func emit_zombie_idle() -> void:
 
 func emit_window_repaired(window_id: String, points: int) -> void:
 	window_repaired.emit(window_id, points)
+
+func emit_board_broken() -> void:
+	board_broken.emit()

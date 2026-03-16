@@ -19,8 +19,7 @@ func interact(player: PlayerController) -> void:
 	player.camera.add_child(new_weapon)
 	if new_weapon is Weapon:
 		(new_weapon as Weapon).equip(player)
-	player.add_weapon(new_weapon)
-	player.equip_weapon(new_weapon)
+	player.replace_weapon(player.current_weapon, new_weapon)
 	var wname: String = (new_weapon as Weapon).weapon_name if new_weapon is Weapon else ""
 	EventBus.emit_mystery_box_used(player.player_id)
 	EventBus.emit_weapon_purchased(player.player_id, wname, cost)

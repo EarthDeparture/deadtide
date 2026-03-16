@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://b1map"]
+[gd_scene load_steps=31 format=3 uid="uid://b1map"]
 
 [ext_resource type="Script" path="res://scripts/maps/PrototypeMap.gd" id="1_map"]
 [ext_resource type="PackedScene" uid="uid://b1wallbuy" path="res://scenes/interactables/WallBuy.tscn" id="2_wb"]
@@ -57,6 +57,9 @@ size = Vector3(6, 1, 6)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ext_floor"]
 size = Vector3(6, 1, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_connector"]
+size = Vector3(1, 1, 4)
 
 [sub_resource type="BoxMesh" id="BoxMesh_crate"]
 size = Vector3(1, 1, 1)
@@ -137,6 +140,13 @@ shape = SubResource("BoxShape3D_ext_floor")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 mesh = SubResource("BoxMesh_ext_floor")
 surface_material_override/0 = SubResource("Mat_floor")
+
+[node name="FloorConnector" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FloorConnector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_connector")
 
 [node name="Walls" type="Node3D" parent="."]
 

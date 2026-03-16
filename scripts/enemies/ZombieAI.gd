@@ -35,6 +35,9 @@ var state: State = State.CHASING
 var target_window: WindowBarricade = null
 var _break_timer: float = 0.0
 var _climb_timer: float = 0.0
+var is_dead: bool = false
+
+const KILL_PLANE_Y: float = -5.0
 
 @onready var attack_area: Area3D = $AttackArea
 @onready var mesh_instance: MeshInstance3D = $MeshInstance3D
@@ -83,6 +86,16 @@ func set_target_window(window: WindowBarricade) -> void:
 	state = State.APPROACHING
 
 func _physics_process(delta: float):
+	if global_position.y < KILL_PLANE_Y:
+		if not is_dead:
+			is_dead = true
+			if target_window != null and is_instance_valid(target_window):
+				if target_window.zombie_at_window == self:
+					target_window.zombie_at_window = null
+			killed.emit(self, "void", -1)
+			queue_free()
+		return
+
 	_idle_timer -= delta
 	if _idle_timer <= 0.0:
 		EventBus.emit_zombie_idle()
@@ -113,6 +126,7 @@ func _state_approaching(delta: float) -> void:
 		state = State.CHASING
 		return
 	if target_window.is_passable():
+		global_position = target_window.get_interior_entry_position()
 		target_window = null
 		state = State.CHASING
 		return
@@ -143,6 +157,7 @@ func _state_waiting(delta: float) -> void:
 		state = State.CHASING
 		return
 	if target_window.is_passable():
+		global_position = target_window.get_interior_entry_position()
 		target_window = null
 		state = State.CHASING
 		return
@@ -174,6 +189,7 @@ func _state_breaking(delta: float) -> void:
 	_break_timer -= delta
 	if _break_timer <= 0.0:
 		var boards_remain: bool = target_window.break_next_board()
+		EventBus.emit_board_broken()
 		if boards_remain:
 			_break_timer = BOARD_BREAK_INTERVAL
 		else:
@@ -190,6 +206,8 @@ func _state_climbing(delta: float) -> void:
 	move_and_slide()
 	_climb_timer -= delta
 	if _climb_timer <= 0.0:
+		if target_window != null and is_instance_valid(target_window):
+			global_position = target_window.get_interior_entry_position()
 		target_window = null
 		state = State.CHASING
 
@@ -240,6 +258,9 @@ func _flash_hit() -> void:
 		tween.tween_property(_head_mat, "albedo_color", BASE_HEAD_COLOR, 0.2)
 
 func die(damage_type: String, attacker_id: int):
+	if is_dead:
+		return
+	is_dead = true
 	if target_window != null and is_instance_valid(target_window):
 		if target_window.zombie_at_window == self:
 			target_window.zombie_at_window = null
