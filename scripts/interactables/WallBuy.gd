@@ -27,7 +27,6 @@ func interact(player: PlayerController) -> void:
 		if new_weapon is Weapon:
 			(new_weapon as Weapon).weapon_name = weapon_name
 			(new_weapon as Weapon).equip(player)
-		player.add_weapon(new_weapon)
-		player.equip_weapon(new_weapon)
+		player.add_or_replace_secondary(new_weapon)
 	else:
 		EventBus.emit_purchase_denied(player.player_id)

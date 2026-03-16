@@ -170,6 +170,8 @@ func die():
 	set_process(false)
 	set_physics_process(false)
 	set_process_input(false)
+	for w in weapons:
+		w.set_process(false)
 
 func _enter_downed():
 	is_downed = true
@@ -210,16 +212,17 @@ func add_weapon(weapon: Node3D):
 	if current_weapon == null:
 		equip_weapon(weapon)
 
-func replace_weapon(old: Node3D, replacement: Node3D) -> void:
-	var idx: int = weapons.find(old)
-	if idx >= 0:
-		weapons[idx] = replacement
+# Adds a purchased/box gun: always slot 2. If slot 2 already exists, replace it.
+# Slot 1 (weapons[0]) — the starter pistol — is never touched.
+func add_or_replace_secondary(new_weapon: Node3D) -> void:
+	if weapons.size() < 2:
+		weapons.append(new_weapon)
 	else:
-		weapons.append(replacement)
-	current_weapon = null
-	equip_weapon(replacement)
-	if old != null and is_instance_valid(old):
-		old.queue_free()
+		var old: Node3D = weapons[1]
+		weapons[1] = new_weapon
+		if is_instance_valid(old):
+			old.queue_free()
+	equip_weapon(new_weapon)
 
 func equip_weapon(weapon: Node3D):
 	if current_weapon != null:

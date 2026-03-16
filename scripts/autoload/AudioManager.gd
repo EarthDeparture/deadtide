@@ -140,7 +140,7 @@ func _connect_signals() -> void:
 	GameManager.powerup_activated.connect(_on_powerup_activated)
 	GameManager.round_started.connect(func(_a: int) -> void: play("round_start"))
 	GameManager.round_ended.connect(func(_a: int) -> void: play("round_complete"))
-	GameManager.game_over.connect(func() -> void: play("game_over"))
+	GameManager.game_over.connect(_on_game_over)
 
 func _on_weapon_reloaded(_pid: int, wname: String) -> void:
 	play("reload")
@@ -162,6 +162,14 @@ func _on_weapon_fired(_pid: int, wname: String) -> void:
 
 func _on_hit_registered(_pid: int, is_headshot: bool) -> void:
 	play("hit_head" if is_headshot else "hit_body")
+
+func _on_game_over() -> void:
+	play("game_over")
+	# Fade zombie/SFX pool down so the game over music is clearly audible
+	var tween := create_tween()
+	tween.set_parallel(true)
+	for p in _pool:
+		tween.tween_property(p, "volume_db", -24.0, 2.0)
 
 func _on_powerup_activated(type: String, _dur: float) -> void:
 	match type:
