@@ -22,6 +22,14 @@ func _ready():
 	zombie_scene = preload("res://scenes/enemies/Zombie.tscn")
 	_powerup_scene = preload("res://scenes/powerups/PowerUp.tscn")
 
+func reset() -> void:
+	for zombie in active_zombies:
+		if is_instance_valid(zombie):
+			zombie.queue_free()
+	active_zombies.clear()
+	spawn_points.clear()
+	windows.clear()
+
 func register_spawn_point(spawn_point: Node3D):
 	spawn_points.append(spawn_point)
 
@@ -32,6 +40,8 @@ func spawn_wave(round_number: int):
 	var zombie_count: int = 6 + (4 * round_number)
 	print("Spawning ", zombie_count, " zombies for round ", round_number)
 	for i in range(zombie_count):
+		if not GameManager.game_active:
+			return
 		_spawn_zombie()
 		await get_tree().create_timer(0.5).timeout
 

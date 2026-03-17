@@ -6,7 +6,7 @@ signal opened()
 @export var cost: int = 750
 @export var label: String = "Open Door"
 
-func get_prompt() -> String:
+func get_prompt(_player: PlayerController = null) -> String:
 	return "Press F: %s - %dpts" % [label, cost]
 
 func interact(player: PlayerController) -> void:

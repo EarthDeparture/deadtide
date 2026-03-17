@@ -4,7 +4,7 @@ extends Interactable
 @export var perk_name: String = "juggernaut"
 @export var cost: int = 2500
 
-func get_prompt() -> String:
+func get_prompt(_player: PlayerController = null) -> String:
 	return "Press F: %s - %dpts" % [perk_name.capitalize(), cost]
 
 func interact(player: PlayerController) -> void:

@@ -7,6 +7,7 @@ var _fire_light: AudioStreamPlayer
 var _fire_smg: AudioStreamPlayer
 var _fire_heavy: AudioStreamPlayer
 var _ambience: AudioStreamPlayer
+var _hit_player: AudioStreamPlayer
 var _streams: Dictionary = {}
 var _zombie_streams: Array[AudioStream] = []
 
@@ -29,6 +30,7 @@ func _build_pool() -> void:
 	_ambience.stream = load("res://assets/audio/horror_ambience.ogg")
 	(_ambience.stream as AudioStreamOggVorbis).loop = true
 	_ambience.play()
+	_hit_player = _new_player(-14.0)
 
 func _new_player(vol_db: float) -> AudioStreamPlayer:
 	var p := AudioStreamPlayer.new()
@@ -117,7 +119,6 @@ func _gen_all() -> void:
 	_streams["hit_head"] = load("res://assets/audio/wet_impact.ogg")
 
 # ── Signal wiring ──────────────────────────────────────────────────────
-
 func _connect_signals() -> void:
 	EventBus.weapon_fired.connect(_on_weapon_fired)
 	EventBus.weapon_reloaded.connect(_on_weapon_reloaded)
@@ -161,7 +162,8 @@ func _on_weapon_fired(_pid: int, wname: String) -> void:
 			_fire_light.play()
 
 func _on_hit_registered(_pid: int, is_headshot: bool) -> void:
-	play("hit_head" if is_headshot else "hit_body")
+	_hit_player.stream = _streams["hit_head" if is_headshot else "hit_body"] as AudioStream
+	_hit_player.play()
 
 func _on_game_over() -> void:
 	play("game_over")

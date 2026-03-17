@@ -4,7 +4,7 @@ extends Interactable
 @export var weapon_scenes: Array[PackedScene] = []
 @export var cost: int = 950
 
-func get_prompt() -> String:
+func get_prompt(_player: PlayerController = null) -> String:
 	return "Press F: Mystery Box - %dpts" % cost
 
 func interact(player: PlayerController) -> void:

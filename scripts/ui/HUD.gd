@@ -81,7 +81,7 @@ func _ready():
 		_update_vignette()
 	EventBus.headshot_hit.connect(_on_headshot_hit)
 
-	if GameManager.players.size() > 0:
+	if GameManager.players.size() > 0 and is_instance_valid(GameManager.players[0]):
 		var pid: int = GameManager.players[0].get_instance_id()
 		_last_points = GameManager.get_player_points(pid)
 		points_label.text = "POINTS\n%d" % _last_points
@@ -159,7 +159,7 @@ func _on_round_countdown(seconds_remaining: int):
 
 func _on_game_over():
 	var points: int = 0
-	if GameManager.players.size() > 0:
+	if GameManager.players.size() > 0 and is_instance_valid(GameManager.players[0]):
 		var pid: int = GameManager.players[0].get_instance_id()
 		points = GameManager.get_player_points(pid)
 	game_over_label.text = "GAME OVER\nRound %d\n%d pts" % [GameManager.current_round, points]
@@ -184,6 +184,8 @@ func _on_powerup_expired(_type: String):
 
 func _on_play_again_pressed():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	ZombieManager.reset()
+	GameManager.reset()
 	get_tree().reload_current_scene()
 
 func _on_quit_pressed():

@@ -46,7 +46,8 @@ func activate_powerup(type: String):
 			powerup_activated.emit("max_ammo", 0.0)
 		"nuke":
 			for player in players:
-				add_player_points(player.get_instance_id(), 400)
+				if is_instance_valid(player):
+					add_player_points(player.get_instance_id(), 400)
 			ZombieManager.nuke_all()
 			powerup_activated.emit("nuke", 0.0)
 		"double_points":
@@ -57,6 +58,17 @@ func activate_powerup(type: String):
 			insta_kill_active = true
 			insta_kill_timer = POWERUP_DURATION
 			powerup_activated.emit("insta_kill", POWERUP_DURATION)
+
+func reset() -> void:
+	game_active = false
+	round_in_progress = false
+	current_round = 1
+	players.clear()
+	player_data.clear()
+	double_points_active = false
+	insta_kill_active = false
+	double_points_timer = 0.0
+	insta_kill_timer = 0.0
 
 func start_game():
 	game_active = true
@@ -83,6 +95,8 @@ func end_round():
 	round_ended.emit(current_round)
 	current_round += 1
 	for i in range(10, 0, -1):
+		if not game_active:
+			return
 		round_countdown.emit(i)
 		await get_tree().create_timer(1.0).timeout
 	start_round()
@@ -130,6 +144,8 @@ func revive_player(player_id: int, reviver_id: int):
 func check_game_over():
 	var all_downed: bool = true
 	for player in players:
+		if not is_instance_valid(player):
+			continue
 		var pid: int = (player as Node).get_instance_id()
 		if player_data.has(pid) and not player_data[pid]["is_downed"]:
 			all_downed = false

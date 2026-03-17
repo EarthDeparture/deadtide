@@ -90,7 +90,7 @@ func _physics_process(delta: float):
 	if Input.is_action_just_pressed("interact") and nearby_interactable != null:
 		nearby_interactable.interact(self)
 		if is_instance_valid(nearby_interactable) and nearby_interactable.has_method("get_prompt"):
-			interact_prompt_changed.emit(nearby_interactable.get_prompt())
+			interact_prompt_changed.emit(nearby_interactable.get_prompt(self))
 
 	if weapons.size() > 1:
 		if Input.is_action_just_pressed("weapon_1"):
@@ -226,6 +226,23 @@ func add_or_replace_secondary(new_weapon: Node3D) -> void:
 			old.queue_free()
 	equip_weapon(new_weapon)
 
+# Wall-buy slot logic:
+# - 1 gun (starter only): new gun takes slot 1, starter becomes slot 2
+# - 2 guns: new gun replaces whichever gun the player is currently holding
+func buy_weapon(new_weapon: Node3D) -> void:
+	if weapons.size() < 2:
+		weapons.insert(0, new_weapon)
+	else:
+		var slot: int = weapons.find(current_weapon)
+		if slot == -1:
+			slot = 1
+		var old: Node3D = weapons[slot]
+		weapons[slot] = new_weapon
+		current_weapon = null
+		if is_instance_valid(old):
+			old.queue_free()
+	equip_weapon(new_weapon)
+
 func equip_weapon(weapon: Node3D):
 	if current_weapon != null:
 		current_weapon.visible = false
@@ -243,7 +260,7 @@ func _on_interact_area_entered(area: Area3D) -> void:
 	var parent: Node = area.get_parent()
 	if parent != null and parent.has_method("get_prompt"):
 		nearby_interactable = parent
-		interact_prompt_changed.emit(parent.get_prompt())
+		interact_prompt_changed.emit(parent.get_prompt(self))
 
 func _on_interact_area_exited(area: Area3D) -> void:
 	var parent: Node = area.get_parent()

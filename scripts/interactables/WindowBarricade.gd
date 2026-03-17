@@ -61,7 +61,7 @@ func _on_repair_body_exited(body: Node) -> void:
 func interact(_player: PlayerController) -> void:
 	pass
 
-func get_prompt() -> String:
+func get_prompt(_player: PlayerController = null) -> String:
 	var intact: int = get_boards_intact()
 	if intact < BOARD_COUNT:
 		return "Hold F: Repair Window [%d/%d]" % [intact, BOARD_COUNT]
