@@ -17,35 +17,157 @@ anchor_bottom = 1.0
 color = Color(0, 0, 0, 0.6)
 mouse_filter = 0
 
-[node name="Panel" type="PanelContainer" parent="Control"]
+[node name="MainPanel" type="PanelContainer" parent="Control"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -140.0
-offset_top = -100.0
+offset_top = -120.0
 offset_right = 140.0
-offset_bottom = 100.0
+offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="Control/Panel"]
+[node name="VBox" type="VBoxContainer" parent="Control/MainPanel"]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 272.0
-offset_bottom = 192.0
+offset_bottom = 232.0
 theme_override_constants/separation = 16
 
-[node name="TitleLabel" type="Label" parent="Control/Panel/VBox"]
+[node name="TitleLabel" type="Label" parent="Control/MainPanel/VBox"]
 theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 text = "PAUSED"
 
-[node name="ResumeButton" type="Button" parent="Control/Panel/VBox"]
+[node name="ResumeButton" type="Button" parent="Control/MainPanel/VBox"]
 theme_override_font_sizes/font_size = 18
 text = "RESUME"
 
-[node name="QuitButton" type="Button" parent="Control/Panel/VBox"]
+[node name="SettingsButton" type="Button" parent="Control/MainPanel/VBox"]
+theme_override_font_sizes/font_size = 18
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="Control/MainPanel/VBox"]
 theme_override_font_sizes/font_size = 18
 text = "QUIT"
+
+[node name="SettingsPanel" type="PanelContainer" parent="Control"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -230.0
+offset_right = 210.0
+offset_bottom = 230.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Control/SettingsPanel"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 412.0
+offset_bottom = 452.0
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="Control/SettingsPanel/VBox"]
+theme_override_colors/font_color = Color(1.0, 0.65, 0.1, 1.0)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "SETTINGS"
+
+[node name="AudioHeader" type="Label" parent="Control/SettingsPanel/VBox"]
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1.0)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+text = "— AUDIO —"
+
+[node name="MasterRow" type="HBoxContainer" parent="Control/SettingsPanel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="MasterLabel" type="Label" parent="Control/SettingsPanel/VBox/MasterRow"]
+custom_minimum_size = Vector2(140, 0)
+text = "Master Volume"
+vertical_alignment = 1
+
+[node name="MasterSlider" type="HSlider" parent="Control/SettingsPanel/VBox/MasterRow"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(100, 20)
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="MasterValueLabel" type="Label" parent="Control/SettingsPanel/VBox/MasterRow"]
+custom_minimum_size = Vector2(45, 0)
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="GraphicsHeader" type="Label" parent="Control/SettingsPanel/VBox"]
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1.0)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+text = "— GRAPHICS —"
+
+[node name="RenderScaleRow" type="HBoxContainer" parent="Control/SettingsPanel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="RenderScaleLabel" type="Label" parent="Control/SettingsPanel/VBox/RenderScaleRow"]
+custom_minimum_size = Vector2(140, 0)
+text = "Render Scale"
+vertical_alignment = 1
+
+[node name="RenderScaleSlider" type="HSlider" parent="Control/SettingsPanel/VBox/RenderScaleRow"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(100, 20)
+min_value = 50.0
+max_value = 100.0
+step = 5.0
+value = 100.0
+
+[node name="RenderScaleValueLabel" type="Label" parent="Control/SettingsPanel/VBox/RenderScaleRow"]
+custom_minimum_size = Vector2(45, 0)
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="VSyncRow" type="HBoxContainer" parent="Control/SettingsPanel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="VSyncLabel" type="Label" parent="Control/SettingsPanel/VBox/VSyncRow"]
+custom_minimum_size = Vector2(140, 0)
+text = "VSync"
+vertical_alignment = 1
+
+[node name="VSyncToggle" type="CheckButton" parent="Control/SettingsPanel/VBox/VSyncRow"]
+
+[node name="MSAARow" type="HBoxContainer" parent="Control/SettingsPanel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="MSAALabel" type="Label" parent="Control/SettingsPanel/VBox/MSAARow"]
+custom_minimum_size = Vector2(140, 0)
+text = "Anti-Aliasing"
+vertical_alignment = 1
+
+[node name="MSAAOption" type="OptionButton" parent="Control/SettingsPanel/VBox/MSAARow"]
+size_flags_horizontal = 3
+
+[node name="FPSRow" type="HBoxContainer" parent="Control/SettingsPanel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="FPSLabel" type="Label" parent="Control/SettingsPanel/VBox/FPSRow"]
+custom_minimum_size = Vector2(140, 0)
+text = "Max FPS"
+vertical_alignment = 1
+
+[node name="FPSOption" type="OptionButton" parent="Control/SettingsPanel/VBox/FPSRow"]
+size_flags_horizontal = 3
+
+[node name="BackButton" type="Button" parent="Control/SettingsPanel/VBox"]
+theme_override_font_sizes/font_size = 18
+text = "BACK"
