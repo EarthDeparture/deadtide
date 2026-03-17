@@ -42,6 +42,9 @@ func _process(delta: float):
 	_dry_fire_timer = maxf(_dry_fire_timer - delta, 0.0)
 	fire_timer = maxf(fire_timer - delta, 0.0)
 
+	if not visible:
+		return
+
 	if is_reloading:
 		return
 
