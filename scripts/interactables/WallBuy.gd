@@ -7,6 +7,11 @@ extends Interactable
 @export var ammo_cost: int = 250
 @export var ammo_amount: int = 30
 
+func _ready() -> void:
+	var label := get_node_or_null("Label3D") as Label3D
+	if label:
+		label.text = "%s\n%dpts" % [weapon_name, weapon_cost]
+
 func get_prompt(player: PlayerController = null) -> String:
 	if player != null:
 		for w in player.weapons:
